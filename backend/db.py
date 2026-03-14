@@ -33,9 +33,7 @@ async def init_db() -> None:
                 user_id INTEGER DEFAULT NULL
             )
         """)
-        await db.execute(
-            "CREATE INDEX IF NOT EXISTS idx_analyses_cve_id ON analyses(cve_id)"
-        )
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_analyses_cve_id ON analyses(cve_id)")
         await db.execute(
             "CREATE INDEX IF NOT EXISTS idx_analyses_created_at ON analyses(created_at)"
         )
@@ -55,9 +53,7 @@ async def init_db() -> None:
                 updated_at TEXT NOT NULL
             )
         """)
-        await db.execute(
-            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)"
-        )
+        await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)")
 
         # ── Refresh tokens table ────────────────────────────────────
         await db.execute("""
@@ -118,16 +114,12 @@ async def init_db() -> None:
 
         # ── Migration: add user_id to existing analyses table ───────
         try:
-            await db.execute(
-                "ALTER TABLE analyses ADD COLUMN user_id INTEGER DEFAULT NULL"
-            )
+            await db.execute("ALTER TABLE analyses ADD COLUMN user_id INTEGER DEFAULT NULL")
             logger.info("Migrated analyses table: added user_id column")
         except Exception:
             pass  # Column already exists
 
-        await db.execute(
-            "CREATE INDEX IF NOT EXISTS idx_analyses_user_id ON analyses(user_id)"
-        )
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_analyses_user_id ON analyses(user_id)")
 
         # ── Migration: add email_verified to users table ────────────
         try:
@@ -206,9 +198,7 @@ async def get_analysis(analysis_id: int, user_id: int | None = None) -> dict | N
                 (analysis_id, user_id),
             )
         else:
-            cursor = await db.execute(
-                "SELECT * FROM analyses WHERE id = ?", (analysis_id,)
-            )
+            cursor = await db.execute("SELECT * FROM analyses WHERE id = ?", (analysis_id,))
         row = await cursor.fetchone()
         if not row:
             return None

@@ -100,9 +100,7 @@ async def deactivate_user(user_id: int) -> None:
 # ── Refresh Tokens ──────────────────────────────────────────────────────
 
 
-async def store_refresh_token(
-    user_id: int, token_hash: str, expires_at: str
-) -> None:
+async def store_refresh_token(user_id: int, token_hash: str, expires_at: str) -> None:
     """Store a hashed refresh token."""
     now = datetime.now(timezone.utc).isoformat()
     async with aiosqlite.connect(DB_PATH) as db:
@@ -151,9 +149,7 @@ async def revoke_all_user_tokens(user_id: int) -> None:
 # ── Password Reset Tokens ─────────────────────────────────────────────
 
 
-async def store_password_reset_token(
-    user_id: int, token_hash: str, expires_at: str
-) -> None:
+async def store_password_reset_token(user_id: int, token_hash: str, expires_at: str) -> None:
     """Store a hashed password reset token."""
     now = datetime.now(timezone.utc).isoformat()
     async with aiosqlite.connect(DB_PATH) as db:
@@ -192,9 +188,7 @@ async def consume_password_reset_token(token_hash: str) -> None:
 # ── Email Verification Tokens ─────────────────────────────────────────
 
 
-async def store_verification_token(
-    user_id: int, token_hash: str, expires_at: str
-) -> None:
+async def store_verification_token(user_id: int, token_hash: str, expires_at: str) -> None:
     """Store a hashed email verification token."""
     now = datetime.now(timezone.utc).isoformat()
     async with aiosqlite.connect(DB_PATH) as db:
@@ -236,9 +230,7 @@ async def consume_verification_token(token_hash: str) -> None:
 async def get_app_setting(key: str) -> str | None:
     """Get a setting value by key."""
     async with aiosqlite.connect(DB_PATH) as db:
-        cursor = await db.execute(
-            "SELECT value FROM app_settings WHERE key = ?", (key,)
-        )
+        cursor = await db.execute("SELECT value FROM app_settings WHERE key = ?", (key,))
         row = await cursor.fetchone()
         return row[0] if row else None
 

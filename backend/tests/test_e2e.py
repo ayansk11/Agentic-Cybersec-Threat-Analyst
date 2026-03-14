@@ -4,44 +4,47 @@ import json
 from unittest.mock import MagicMock, patch, AsyncMock
 
 
-
 # ── Mock LLM responses ──────────────────────────────────────────────────
 
-AGENT1_LLM_RESPONSE = json.dumps({
-    "summary": "Critical RCE in Apache Log4j2 via JNDI injection",
-    "severity_assessment": "CRITICAL - actively exploited",
-    "attack_vector": "Network",
-    "attack_complexity": "Low",
-    "privileges_required": "None",
-    "user_interaction": "None",
-    "affected_software": ["Apache Log4j2 2.0-beta9 through 2.15.0"],
-    "cwe_category": "CWE-502 Deserialization of Untrusted Data",
-    "vulnerability_type": "Remote Code Execution",
-    "potential_impact": "Full system compromise via arbitrary code execution",
-    "iocs": [],
-    "key_risk_factors": ["No authentication required", "Network accessible"],
-    "exploitation_likelihood": "Active",
-    "recommended_priority": "Immediate",
-})
+AGENT1_LLM_RESPONSE = json.dumps(
+    {
+        "summary": "Critical RCE in Apache Log4j2 via JNDI injection",
+        "severity_assessment": "CRITICAL - actively exploited",
+        "attack_vector": "Network",
+        "attack_complexity": "Low",
+        "privileges_required": "None",
+        "user_interaction": "None",
+        "affected_software": ["Apache Log4j2 2.0-beta9 through 2.15.0"],
+        "cwe_category": "CWE-502 Deserialization of Untrusted Data",
+        "vulnerability_type": "Remote Code Execution",
+        "potential_impact": "Full system compromise via arbitrary code execution",
+        "iocs": [],
+        "key_risk_factors": ["No authentication required", "Network accessible"],
+        "exploitation_likelihood": "Active",
+        "recommended_priority": "Immediate",
+    }
+)
 
-AGENT2_LLM_RESPONSE = json.dumps({
-    "techniques": [
-        {
-            "technique_id": "T1190",
-            "name": "Exploit Public-Facing Application",
-            "tactics": ["initial-access"],
-            "confidence": 0.95,
-            "rationale": "Log4Shell allows RCE via crafted JNDI lookups",
-        },
-        {
-            "technique_id": "T1059",
-            "name": "Command and Scripting Interpreter",
-            "tactics": ["execution"],
-            "confidence": 0.85,
-            "rationale": "Post-exploitation command execution",
-        },
-    ]
-})
+AGENT2_LLM_RESPONSE = json.dumps(
+    {
+        "techniques": [
+            {
+                "technique_id": "T1190",
+                "name": "Exploit Public-Facing Application",
+                "tactics": ["initial-access"],
+                "confidence": 0.95,
+                "rationale": "Log4Shell allows RCE via crafted JNDI lookups",
+            },
+            {
+                "technique_id": "T1059",
+                "name": "Command and Scripting Interpreter",
+                "tactics": ["execution"],
+                "confidence": 0.85,
+                "rationale": "Post-exploitation command execution",
+            },
+        ]
+    }
+)
 
 AGENT3_PLAYBOOK_RESPONSE = """# Incident Response Playbook: CVE-2021-44228
 
@@ -125,8 +128,16 @@ class TestFullPipeline:
     """Test the complete 3-agent LangGraph pipeline with mocked externals."""
 
     @patch("backend.agents.cve_extractor.get_llm")
-    @patch("backend.agents.cve_extractor.fetch_threatfox_by_cve", new_callable=AsyncMock, return_value=[])
-    @patch("backend.agents.cve_extractor.fetch_otx_pulse_by_cve", new_callable=AsyncMock, return_value=[])
+    @patch(
+        "backend.agents.cve_extractor.fetch_threatfox_by_cve",
+        new_callable=AsyncMock,
+        return_value=[],
+    )
+    @patch(
+        "backend.agents.cve_extractor.fetch_otx_pulse_by_cve",
+        new_callable=AsyncMock,
+        return_value=[],
+    )
     @patch("backend.agents.cve_extractor.is_in_kev", return_value=True)
     @patch("backend.agents.cve_extractor.fetch_cve", new_callable=AsyncMock)
     @patch("backend.agents.attack_classifier.hybrid_search")
@@ -134,8 +145,14 @@ class TestFullPipeline:
     @patch("backend.agents.playbook_generator.get_llm")
     def test_full_pipeline_produces_all_outputs(
         self,
-        mock_pb_llm, mock_ac_llm, mock_rag,
-        mock_fetch_cve, mock_kev, mock_otx, mock_tfox, mock_ce_llm,
+        mock_pb_llm,
+        mock_ac_llm,
+        mock_rag,
+        mock_fetch_cve,
+        mock_kev,
+        mock_otx,
+        mock_tfox,
+        mock_ce_llm,
     ):
         """Pipeline should produce extracted_info, techniques, playbook, and sigma rule."""
         # Setup mocks
@@ -192,7 +209,9 @@ class TestAnalyzeEndpoint:
     @patch("backend.api.routes.fire_webhook")
     @patch("backend.api.routes.save_analysis", new_callable=AsyncMock, return_value=1)
     @patch("backend.api.routes.graph")
-    def test_analyze_returns_complete_response(self, mock_graph, mock_save, mock_webhook, test_client):
+    def test_analyze_returns_complete_response(
+        self, mock_graph, mock_save, mock_webhook, test_client
+    ):
         """Analyze endpoint should return structured response matching schema."""
         mock_graph.invoke.return_value = {
             "cve_id": "CVE-2021-44228",
@@ -234,16 +253,33 @@ class TestPipelineErrorHandling:
     """Test that the pipeline handles errors gracefully."""
 
     @patch("backend.agents.cve_extractor.get_llm")
-    @patch("backend.agents.cve_extractor.fetch_threatfox_by_cve", new_callable=AsyncMock, return_value=[])
-    @patch("backend.agents.cve_extractor.fetch_otx_pulse_by_cve", new_callable=AsyncMock, return_value=[])
+    @patch(
+        "backend.agents.cve_extractor.fetch_threatfox_by_cve",
+        new_callable=AsyncMock,
+        return_value=[],
+    )
+    @patch(
+        "backend.agents.cve_extractor.fetch_otx_pulse_by_cve",
+        new_callable=AsyncMock,
+        return_value=[],
+    )
     @patch("backend.agents.cve_extractor.is_in_kev", return_value=False)
-    @patch("backend.agents.cve_extractor.fetch_cve", new_callable=AsyncMock, return_value={"error": "not found"})
+    @patch(
+        "backend.agents.cve_extractor.fetch_cve",
+        new_callable=AsyncMock,
+        return_value={"error": "not found"},
+    )
     @patch("backend.agents.attack_classifier.hybrid_search", side_effect=Exception("Qdrant down"))
     @patch("backend.agents.playbook_generator.get_llm")
     def test_pipeline_continues_on_qdrant_failure(
         self,
-        mock_pb_llm, mock_rag,
-        mock_fetch_cve, mock_kev, mock_otx, mock_tfox, mock_ce_llm,
+        mock_pb_llm,
+        mock_rag,
+        mock_fetch_cve,
+        mock_kev,
+        mock_otx,
+        mock_tfox,
+        mock_ce_llm,
     ):
         """If Qdrant is down, Agent 2 returns empty techniques and Agent 3 still runs."""
         mock_ce_llm.return_value = _make_mock_llm([AGENT1_LLM_RESPONSE])
@@ -251,16 +287,18 @@ class TestPipelineErrorHandling:
 
         from backend.agents.graph import graph
 
-        result = graph.invoke({
-            "cve_id": "CVE-2024-0001",
-            "cve_description": "Test vulnerability",
-            "extracted_info": {},
-            "attack_techniques": [],
-            "rag_context": "",
-            "response_playbook": "",
-            "sigma_rule": "",
-            "messages": [],
-        })
+        result = graph.invoke(
+            {
+                "cve_id": "CVE-2024-0001",
+                "cve_description": "Test vulnerability",
+                "extracted_info": {},
+                "attack_techniques": [],
+                "rag_context": "",
+                "response_playbook": "",
+                "sigma_rule": "",
+                "messages": [],
+            }
+        )
 
         # Agent 2 should report Qdrant failure but not crash
         assert result["attack_techniques"] == []

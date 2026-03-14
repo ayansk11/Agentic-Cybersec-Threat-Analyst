@@ -139,9 +139,7 @@ async def stream_analysis(
 
         try:
             loop = asyncio.get_event_loop()
-            stream = await loop.run_in_executor(
-                None, lambda: list(graph.stream(initial_state))
-            )
+            stream = await loop.run_in_executor(None, lambda: list(graph.stream(initial_state)))
 
             for event in stream:
                 if await request.is_disconnected():
@@ -154,9 +152,7 @@ async def stream_analysis(
                         "data": json.dumps(
                             {
                                 "agent": node_name,
-                                "output": {
-                                    k: v for k, v in output.items() if k != "messages"
-                                },
+                                "output": {k: v for k, v in output.items() if k != "messages"},
                             },
                             default=str,
                         ),
@@ -180,10 +176,9 @@ async def stream_analysis(
                 logger.warning("Failed to persist analysis for %s", body.cve_id, exc_info=True)
 
             # Metrics + webhook
-            severity = (
-                final_state.get("extracted_info", {}).get("nvd_severity")
-                or final_state.get("extracted_info", {}).get("severity_assessment", "UNKNOWN")
-            )
+            severity = final_state.get("extracted_info", {}).get("nvd_severity") or final_state.get(
+                "extracted_info", {}
+            ).get("severity_assessment", "UNKNOWN")
             analysis_total.labels(severity=severity or "UNKNOWN").inc()
             fire_webhook(
                 cve_id=body.cve_id,
@@ -248,10 +243,9 @@ async def analyze(
         logger.warning("Failed to persist analysis for %s", body.cve_id, exc_info=True)
 
     # Metrics + webhook
-    severity = (
-        result.get("extracted_info", {}).get("nvd_severity")
-        or result.get("extracted_info", {}).get("severity_assessment", "UNKNOWN")
-    )
+    severity = result.get("extracted_info", {}).get("nvd_severity") or result.get(
+        "extracted_info", {}
+    ).get("severity_assessment", "UNKNOWN")
     analysis_total.labels(severity=severity or "UNKNOWN").inc()
     fire_webhook(
         cve_id=result.get("cve_id", body.cve_id),
@@ -356,9 +350,7 @@ async def get_dashboard_stats(
     total = 0
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(
-                f"http://{settings.qdrant_host}:{settings.qdrant_port}"
-            )
+            resp = await client.get(f"http://{settings.qdrant_host}:{settings.qdrant_port}")
             qdrant_ok = resp.status_code == 200
 
             if qdrant_ok:
@@ -454,9 +446,7 @@ async def get_history_item(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """Fetch a single analysis by ID. Analysts can only access their own."""
-    item = await get_analysis(
-        analysis_id, user_id=_scoped_user_id(current_user)
-    )
+    item = await get_analysis(analysis_id, user_id=_scoped_user_id(current_user))
     if not item:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return item

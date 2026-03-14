@@ -37,8 +37,7 @@ def _embed_and_upsert(client, chunks: list[dict], batch_size: int = 32) -> None:
 
         upsert_chunks(client, batch, embeddings)
         print(
-            f"  Batch {i // batch_size + 1}/{total_batches}"
-            f" ({len(batch)} chunks, {elapsed:.1f}s)"
+            f"  Batch {i // batch_size + 1}/{total_batches} ({len(batch)} chunks, {elapsed:.1f}s)"
         )
 
 

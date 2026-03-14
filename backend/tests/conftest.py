@@ -10,13 +10,9 @@ from backend.main import app
 
 # ── Auth fixtures ───────────────────────────────────────────────────────
 
-MOCK_ADMIN = CurrentUser(
-    id=1, email="admin@test.com", username="Admin", role="admin"
-)
+MOCK_ADMIN = CurrentUser(id=1, email="admin@test.com", username="Admin", role="admin")
 
-MOCK_ANALYST = CurrentUser(
-    id=2, email="analyst@test.com", username="Analyst", role="analyst"
-)
+MOCK_ANALYST = CurrentUser(id=2, email="analyst@test.com", username="Analyst", role="analyst")
 
 
 @pytest.fixture(autouse=True)
@@ -37,6 +33,7 @@ def mock_auth():
 def clear_settings_cache():
     """Clear LRU-cached settings between tests to prevent cross-test contamination."""
     from backend.config import get_settings
+
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -49,6 +46,7 @@ def clear_settings_cache():
 def clear_caches():
     """Clear in-memory caches between tests to prevent cross-test contamination."""
     from backend.cache import cve_cache, feed_cache
+
     cve_cache.clear()
     feed_cache.clear()
     yield
@@ -143,7 +141,10 @@ def sample_nvd_response():
                         }
                     ],
                     "references": [
-                        {"url": "https://logging.apache.org/log4j/2.x/security.html", "source": "apache"},
+                        {
+                            "url": "https://logging.apache.org/log4j/2.x/security.html",
+                            "source": "apache",
+                        },
                     ],
                     "published": "2021-12-10T10:15:00",
                     "lastModified": "2023-04-03T20:15:00",
@@ -182,7 +183,11 @@ def sample_otx_response():
                     "adversary": "APT41",
                     "indicators": [
                         {"type": "IPv4", "indicator": "1.2.3.4", "description": "C2 server"},
-                        {"type": "domain", "indicator": "evil.com", "description": "Callback domain"},
+                        {
+                            "type": "domain",
+                            "indicator": "evil.com",
+                            "description": "Callback domain",
+                        },
                     ],
                 }
             ]

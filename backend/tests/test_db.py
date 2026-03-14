@@ -33,7 +33,14 @@ class TestSaveAnalysis:
             cve_id="CVE-2021-44228",
             cve_description="Log4j RCE",
             extracted_info={"severity_assessment": "CRITICAL"},
-            attack_techniques=[{"technique_id": "T1190", "name": "Exploit App", "tactics": ["initial-access"], "confidence": 0.95}],
+            attack_techniques=[
+                {
+                    "technique_id": "T1190",
+                    "name": "Exploit App",
+                    "tactics": ["initial-access"],
+                    "confidence": 0.95,
+                }
+            ],
             response_playbook="# Playbook",
             sigma_rule="title: test",
         )
@@ -110,7 +117,11 @@ class TestTacticCounts:
         await db.init_db()
         techniques = [
             {"technique_id": "T1190", "tactics": ["initial-access"], "confidence": 0.9},
-            {"technique_id": "T1059", "tactics": ["execution", "initial-access"], "confidence": 0.8},
+            {
+                "technique_id": "T1059",
+                "tactics": ["execution", "initial-access"],
+                "confidence": 0.8,
+            },
         ]
         await db.save_analysis("CVE-1", "", {}, techniques, "", "")
         counts = await db.get_tactic_counts()

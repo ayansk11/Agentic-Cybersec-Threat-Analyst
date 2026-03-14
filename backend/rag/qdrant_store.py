@@ -34,9 +34,7 @@ def ensure_collection(client: QdrantClient | None = None) -> None:
             )
         },
         sparse_vectors_config={
-            "sparse": models.SparseVectorParams(
-                index=models.SparseIndexParams(on_disk=False)
-            )
+            "sparse": models.SparseVectorParams(index=models.SparseIndexParams(on_disk=False))
         },
     )
     print(f"Created Qdrant collection: {collection}")
@@ -61,9 +59,7 @@ def recreate_collection(client: QdrantClient | None = None) -> None:
             )
         },
         sparse_vectors_config={
-            "sparse": models.SparseVectorParams(
-                index=models.SparseIndexParams(on_disk=False)
-            )
+            "sparse": models.SparseVectorParams(index=models.SparseIndexParams(on_disk=False))
         },
     )
     print(f"Created Qdrant collection: {collection}")

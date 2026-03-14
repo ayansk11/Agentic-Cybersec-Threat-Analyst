@@ -44,10 +44,7 @@ def chunk_mitigations(mitigations: list[dict]) -> list[dict]:
     """Convert extracted mitigations into chunks ready for embedding."""
     chunks = []
     for mit in mitigations:
-        text = (
-            f"ATT&CK Mitigation {mit['mitigation_id']} - {mit['name']}\n"
-            f"{mit['description']}"
-        )
+        text = f"ATT&CK Mitigation {mit['mitigation_id']} - {mit['name']}\n{mit['description']}"
         chunks.append(
             {
                 "text": text,
@@ -133,7 +130,9 @@ def chunk_relationships(relationships: list[dict], id_lookup: dict) -> list[dict
         elif rel_type == "uses" and source_type == "group":
             header = f"Group {source_id} ({source_name}) uses Technique {target_id} ({target_name})"
         elif rel_type == "uses" and source_type == "software":
-            header = f"Software {source_id} ({source_name}) uses Technique {target_id} ({target_name})"
+            header = (
+                f"Software {source_id} ({source_name}) uses Technique {target_id} ({target_name})"
+            )
         else:
             header = f"{source_id} ({source_name}) {rel_type} {target_id} ({target_name})"
 

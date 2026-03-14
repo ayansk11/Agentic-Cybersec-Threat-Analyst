@@ -75,9 +75,7 @@ def _user_to_response(user: dict) -> UserResponse:
     )
 
 
-async def _issue_tokens(
-    user: dict, response: Response
-) -> AuthResponse:
+async def _issue_tokens(user: dict, response: Response) -> AuthResponse:
     """Create access + refresh tokens and set the refresh cookie."""
     settings = get_settings()
     access_token = create_access_token(user["id"], user["email"], user["role"])
@@ -85,8 +83,7 @@ async def _issue_tokens(
 
     # Store hashed refresh token in DB
     expires_at = (
-        datetime.now(timezone.utc)
-        + timedelta(days=settings.jwt_refresh_expire_days)
+        datetime.now(timezone.utc) + timedelta(days=settings.jwt_refresh_expire_days)
     ).isoformat()
     await store_refresh_token(user["id"], hash_refresh_token(refresh), expires_at)
 
@@ -113,9 +110,7 @@ async def _send_verification_token(user_id: int, email: str) -> str:
 
     token = create_refresh_token()  # reuse random token generator
     token_hash_val = hash_refresh_token(token)
-    expires_at = (
-        datetime.now(timezone.utc) + timedelta(hours=24)
-    ).isoformat()
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
     await store_verification_token(user_id, token_hash_val, expires_at)
 
     settings = get_settings()
@@ -129,9 +124,7 @@ async def _send_reset_token(user_id: int, email: str) -> str:
 
     token = create_refresh_token()
     token_hash_val = hash_refresh_token(token)
-    expires_at = (
-        datetime.now(timezone.utc) + timedelta(hours=1)
-    ).isoformat()
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
     await store_password_reset_token(user_id, token_hash_val, expires_at)
 
     settings = get_settings()
@@ -147,9 +140,7 @@ async def register(body: RegisterRequest, response: Response):
     """Register a new user with email and password."""
     settings = get_settings()
     if not settings.jwt_secret:
-        raise HTTPException(
-            status_code=400, detail="JWT authentication is not configured"
-        )
+        raise HTTPException(status_code=400, detail="JWT authentication is not configured")
 
     existing = await get_user_by_email(body.email)
     if existing:
@@ -178,9 +169,7 @@ async def login(body: LoginRequest, response: Response):
     """Authenticate with email and password."""
     settings = get_settings()
     if not settings.jwt_secret:
-        raise HTTPException(
-            status_code=400, detail="JWT authentication is not configured"
-        )
+        raise HTTPException(status_code=400, detail="JWT authentication is not configured")
 
     user = await get_user_by_email(body.email)
     if not user or not user.get("hashed_password"):
@@ -269,9 +258,7 @@ async def oauth_login(provider: str, response: Response):
     """Redirect to OAuth provider's authorization page."""
     settings = get_settings()
     if not settings.jwt_secret:
-        raise HTTPException(
-            status_code=400, detail="JWT authentication is not configured"
-        )
+        raise HTTPException(status_code=400, detail="JWT authentication is not configured")
 
     oauth = get_oauth_provider(provider)
     if not oauth.is_configured:
@@ -326,9 +313,7 @@ async def oauth_callback(
         user_info = await oauth.get_user_info(provider_token)
     except Exception as exc:
         logger.error("OAuth callback failed for %s: %s", provider, exc)
-        raise HTTPException(
-            status_code=400, detail=f"OAuth authentication failed: {exc}"
-        ) from exc
+        raise HTTPException(status_code=400, detail=f"OAuth authentication failed: {exc}") from exc
 
     # Find or create user
     user = await get_user_by_oauth(user_info.provider, user_info.oauth_id)
@@ -353,9 +338,7 @@ async def oauth_callback(
                 oauth_id=user_info.oauth_id,
             )
             user = await get_user_by_id(user_id)
-            logger.info(
-                "New OAuth user created: %s via %s", user_info.email, provider
-            )
+            logger.info("New OAuth user created: %s via %s", user_info.email, provider)
 
     if not user.get("is_active", 1):
         raise HTTPException(status_code=403, detail="Account is disabled")
@@ -364,8 +347,7 @@ async def oauth_callback(
     access_token = create_access_token(user["id"], user["email"], user["role"])
     refresh = create_refresh_token()
     expires_at = (
-        datetime.now(timezone.utc)
-        + timedelta(days=settings.jwt_refresh_expire_days)
+        datetime.now(timezone.utc) + timedelta(days=settings.jwt_refresh_expire_days)
     ).isoformat()
     await store_refresh_token(user["id"], hash_refresh_token(refresh), expires_at)
 
@@ -511,7 +493,9 @@ async def resend_verification(body: ResendVerificationRequest):
     if user and not user.get("email_verified", 0):
         await _send_verification_token(user["id"], body.email)
 
-    return {"message": "If the email is registered and unverified, a verification link has been sent"}
+    return {
+        "message": "If the email is registered and unverified, a verification link has been sent"
+    }
 
 
 # ── Auth Providers ─────────────────────────────────────────────────────
@@ -545,15 +529,12 @@ async def get_webhook_settings(
     from backend.db_users import get_app_settings_bulk
 
     settings = get_settings()
-    db_settings = await get_app_settings_bulk(
-        ["webhook_url", "webhook_severity_threshold"]
-    )
+    db_settings = await get_app_settings_bulk(["webhook_url", "webhook_severity_threshold"])
 
     return WebhookSettingsResponse(
         webhook_url=db_settings.get("webhook_url", "") or settings.webhook_url,
         webhook_severity_threshold=(
-            db_settings.get("webhook_severity_threshold", "")
-            or settings.webhook_severity_threshold
+            db_settings.get("webhook_severity_threshold", "") or settings.webhook_severity_threshold
         ),
         smtp_configured=bool(settings.smtp_host),
     )

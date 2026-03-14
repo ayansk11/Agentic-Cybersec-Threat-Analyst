@@ -43,9 +43,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             return response
         except Exception:
             elapsed_ms = (time.perf_counter() - start) * 1000
-            logger.exception(
-                "%s %s 500 %.1fms", request.method, request.url.path, elapsed_ms
-            )
+            logger.exception("%s %s 500 %.1fms", request.method, request.url.path, elapsed_ms)
             raise
 
 

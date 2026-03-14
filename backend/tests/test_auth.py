@@ -107,55 +107,62 @@ class TestLegacyAuth:
 class TestAuthSchemas:
     def test_register_request_validation(self):
         from backend.api.schemas import RegisterRequest
+
         req = RegisterRequest(email="a@b.com", username="ab", password="12345678")
         assert req.email == "a@b.com"
 
     def test_register_request_short_username_fails(self):
         from backend.api.schemas import RegisterRequest
+
         with pytest.raises(Exception):
             RegisterRequest(email="a@b.com", username="a", password="12345678")
 
     def test_register_request_short_password_fails(self):
         from backend.api.schemas import RegisterRequest
+
         with pytest.raises(Exception):
             RegisterRequest(email="a@b.com", username="ab", password="short")
 
     def test_login_request(self):
         from backend.api.schemas import LoginRequest
+
         req = LoginRequest(email="a@b.com", password="secret123")
         assert req.email == "a@b.com"
 
     def test_user_response(self):
         from backend.api.schemas import UserResponse
+
         resp = UserResponse(
-            id=1, email="a@b.com", username="test",
-            role="analyst", created_at="2024-01-01T00:00:00"
+            id=1, email="a@b.com", username="test", role="analyst", created_at="2024-01-01T00:00:00"
         )
         assert resp.role == "analyst"
         assert resp.oauth_provider is None
 
     def test_auth_response(self):
         from backend.api.schemas import AuthResponse, UserResponse
+
         user = UserResponse(
-            id=1, email="a@b.com", username="test",
-            role="analyst", created_at="2024-01-01T00:00:00"
+            id=1, email="a@b.com", username="test", role="analyst", created_at="2024-01-01T00:00:00"
         )
         resp = AuthResponse(access_token="abc.def.ghi", user=user)
         assert resp.token_type == "bearer"
 
     def test_user_update_request(self):
         from backend.api.schemas import UserUpdateRequest
+
         req = UserUpdateRequest(role="admin")
         assert req.role == "admin"
         assert req.is_active is None
 
     def test_password_reset_request(self):
         from backend.api.schemas import PasswordResetRequest
+
         req = PasswordResetRequest(email="a@b.com")
         assert req.email == "a@b.com"
 
     def test_password_reset_confirm_validation(self):
         from backend.api.schemas import PasswordResetConfirm
+
         req = PasswordResetConfirm(token="abc123", new_password="newpassword123")
         assert req.token == "abc123"
         with pytest.raises(Exception):
@@ -163,25 +170,33 @@ class TestAuthSchemas:
 
     def test_verify_email_request(self):
         from backend.api.schemas import VerifyEmailRequest
+
         req = VerifyEmailRequest(token="verify-token-123")
         assert req.token == "verify-token-123"
 
     def test_auth_providers_response(self):
         from backend.api.schemas import AuthProvidersResponse
+
         resp = AuthProvidersResponse(local=True, google=True, github=False, jwt_configured=True)
         assert resp.google is True
         assert resp.github is False
 
     def test_user_response_email_verified(self):
         from backend.api.schemas import UserResponse
+
         resp = UserResponse(
-            id=1, email="a@b.com", username="test",
-            role="analyst", email_verified=True, created_at="2024-01-01T00:00:00"
+            id=1,
+            email="a@b.com",
+            username="test",
+            role="analyst",
+            email_verified=True,
+            created_at="2024-01-01T00:00:00",
         )
         assert resp.email_verified is True
 
     def test_resend_verification_request(self):
         from backend.api.schemas import ResendVerificationRequest
+
         req = ResendVerificationRequest(email="a@b.com")
         assert req.email == "a@b.com"
 

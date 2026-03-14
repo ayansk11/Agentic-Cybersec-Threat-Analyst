@@ -112,8 +112,10 @@ def _format_techniques_summary(techniques: list[dict]) -> str:
     for t in techniques:
         tactics = ", ".join(t.get("tactics", []))
         confidence = t.get("confidence", "N/A")
-        lines.append(f"- {t.get('technique_id', '?')} {t.get('name', '?')} "
-                     f"(Tactics: {tactics}, Confidence: {confidence})")
+        lines.append(
+            f"- {t.get('technique_id', '?')} {t.get('name', '?')} "
+            f"(Tactics: {tactics}, Confidence: {confidence})"
+        )
     return "\n".join(lines)
 
 
@@ -156,13 +158,15 @@ def playbook_generator_agent(state: ThreatAnalysisState) -> dict:
     # --- LLM Call 1: Generate Playbook ---
     playbook = ""
     try:
-        playbook_response = llm.invoke([
-            SystemMessage(content=PLAYBOOK_SYSTEM_PROMPT),
-            HumanMessage(
-                content=f"Generate an incident response playbook for the following threat:\n\n"
-                        f"{threat_context}"
-            ),
-        ])
+        playbook_response = llm.invoke(
+            [
+                SystemMessage(content=PLAYBOOK_SYSTEM_PROMPT),
+                HumanMessage(
+                    content=f"Generate an incident response playbook for the following threat:\n\n"
+                    f"{threat_context}"
+                ),
+            ]
+        )
         playbook = _extract_markdown(playbook_response.content)
     except Exception as e:
         logger.exception("Playbook generation failed for %s", cve_id)
@@ -186,14 +190,16 @@ def playbook_generator_agent(state: ThreatAnalysisState) -> dict:
         if tactic_tags:
             all_tags = f"{technique_tags}\n{tactic_tags}" if technique_tags else tactic_tags
 
-        sigma_response = llm.invoke([
-            SystemMessage(content=SIGMA_SYSTEM_PROMPT),
-            HumanMessage(
-                content=f"Generate a Sigma detection rule for the following threat:\n\n"
-                        f"{threat_context}\n\n"
-                        f"Use these ATT&CK tags in the rule:\n{all_tags or '  # No ATT&CK techniques identified'}"
-            ),
-        ])
+        sigma_response = llm.invoke(
+            [
+                SystemMessage(content=SIGMA_SYSTEM_PROMPT),
+                HumanMessage(
+                    content=f"Generate a Sigma detection rule for the following threat:\n\n"
+                    f"{threat_context}\n\n"
+                    f"Use these ATT&CK tags in the rule:\n{all_tags or '  # No ATT&CK techniques identified'}"
+                ),
+            ]
+        )
         sigma_rule = _extract_yaml(sigma_response.content)
     except Exception as e:
         logger.exception("Sigma rule generation failed for %s", cve_id)

@@ -15,6 +15,7 @@ class TestNVDParseCve:
 
     def test_parse_full_cve(self):
         from backend.ingestion.nvd_fetcher import _parse_cve
+
         cve = {
             "id": "CVE-2021-44228",
             "descriptions": [{"lang": "en", "value": "Log4j RCE vulnerability"}],
@@ -36,11 +37,7 @@ class TestNVDParseCve:
             "configurations": [
                 {
                     "nodes": [
-                        {
-                            "cpeMatch": [
-                                {"vulnerable": True, "criteria": "cpe:2.3:a:apache:log4j:*"}
-                            ]
-                        }
+                        {"cpeMatch": [{"vulnerable": True, "criteria": "cpe:2.3:a:apache:log4j:*"}]}
                     ]
                 }
             ],
@@ -54,6 +51,7 @@ class TestNVDParseCve:
 
     def test_parse_cve_no_metrics(self):
         from backend.ingestion.nvd_fetcher import _parse_cve
+
         cve = {
             "id": "CVE-2024-0001",
             "descriptions": [{"lang": "en", "value": "Some vuln"}],
@@ -65,6 +63,7 @@ class TestNVDParseCve:
 
     def test_parse_cve_no_english_description(self):
         from backend.ingestion.nvd_fetcher import _parse_cve
+
         cve = {
             "id": "CVE-2024-0002",
             "descriptions": [{"lang": "es", "value": "Vulnerabilidad"}],
@@ -75,6 +74,7 @@ class TestNVDParseCve:
 
     def test_parse_cve_fallback_cvss_v2(self):
         from backend.ingestion.nvd_fetcher import _parse_cve
+
         cve = {
             "id": "CVE-2020-0001",
             "descriptions": [{"lang": "en", "value": "Old vuln"}],
@@ -112,6 +112,7 @@ class TestNVDFetchCve:
             mock_client_cls.return_value = mock_client
 
             from backend.ingestion.nvd_fetcher import fetch_cve
+
             result = await fetch_cve("CVE-2021-44228")
 
         assert result["cve_id"] == "CVE-2021-44228"
@@ -132,6 +133,7 @@ class TestNVDFetchCve:
             mock_client_cls.return_value = mock_client
 
             from backend.ingestion.nvd_fetcher import fetch_cve
+
             result = await fetch_cve("CVE-9999-99999")
 
         assert "error" in result
@@ -145,6 +147,7 @@ class TestCISAKEV:
 
     def test_parse_kev_entry(self):
         from backend.ingestion.cisa_kev import _parse_kev_entry
+
         entry = {
             "cveID": "CVE-2021-44228",
             "vendorProject": "Apache",
@@ -162,12 +165,19 @@ class TestCISAKEV:
 
     def test_is_in_kev_with_cached_data(self, tmp_path):
         from backend.ingestion import cisa_kev
+
         # Write a temp cache file
         cache = {
             "vulnerabilities": [
-                {"cveID": "CVE-2021-44228", "vendorProject": "Apache", "product": "Log4j",
-                 "vulnerabilityName": "Log4Shell", "dateAdded": "2021-12-10",
-                 "dueDate": "2021-12-24", "requiredAction": "Apply updates"}
+                {
+                    "cveID": "CVE-2021-44228",
+                    "vendorProject": "Apache",
+                    "product": "Log4j",
+                    "vulnerabilityName": "Log4Shell",
+                    "dateAdded": "2021-12-10",
+                    "dueDate": "2021-12-24",
+                    "requiredAction": "Apply updates",
+                }
             ]
         }
         cache_file = tmp_path / "cisa_kev.json"
@@ -190,6 +200,7 @@ class TestOTXFetcher:
 
     def test_parse_pulse(self):
         from backend.ingestion.otx_fetcher import _parse_pulse
+
         pulse = {
             "id": "abc123",
             "name": "Test Pulse",
@@ -211,6 +222,7 @@ class TestOTXFetcher:
 
     def test_parse_pulse_no_adversary(self):
         from backend.ingestion.otx_fetcher import _parse_pulse
+
         pulse = {"id": "x", "name": "Test", "description": "", "indicators": [], "adversary": None}
         result = _parse_pulse(pulse)
         assert result["adversary"] == ""
@@ -219,9 +231,12 @@ class TestOTXFetcher:
     async def test_fetch_otx_no_api_key(self):
         """Without an API key, OTX fetcher returns empty list."""
         with patch("backend.ingestion.otx_fetcher.get_settings") as mock_settings:
-            mock_settings.return_value = MagicMock(otx_api_key="", otx_base_url="https://otx.alienvault.com/api/v1")
+            mock_settings.return_value = MagicMock(
+                otx_api_key="", otx_base_url="https://otx.alienvault.com/api/v1"
+            )
 
             from backend.ingestion.otx_fetcher import fetch_otx_pulse_by_cve
+
             result = await fetch_otx_pulse_by_cve("CVE-2021-44228")
             assert result == []
 
@@ -234,6 +249,7 @@ class TestThreatFoxFetcher:
 
     def test_parse_threatfox_ioc(self):
         from backend.ingestion.abusech_fetcher import _parse_threatfox_ioc
+
         entry = {
             "id": 12345,
             "ioc_type": "ip:port",
@@ -253,6 +269,7 @@ class TestThreatFoxFetcher:
 
     def test_parse_threatfox_ioc_missing_fields(self):
         from backend.ingestion.abusech_fetcher import _parse_threatfox_ioc
+
         entry = {"ioc_type": "url", "ioc": "http://evil.com/payload"}
         result = _parse_threatfox_ioc(entry)
         assert result["ioc_id"] == 0
@@ -275,6 +292,7 @@ class TestThreatFoxFetcher:
             mock_client_cls.return_value = mock_client
 
             from backend.ingestion.abusech_fetcher import fetch_threatfox_by_cve
+
             result = await fetch_threatfox_by_cve("CVE-2021-44228")
 
         assert len(result) == 2
@@ -295,6 +313,7 @@ class TestThreatFoxFetcher:
             mock_client_cls.return_value = mock_client
 
             from backend.ingestion.abusech_fetcher import fetch_threatfox_by_cve
+
             result = await fetch_threatfox_by_cve("CVE-9999-99999")
 
         assert result == []
@@ -309,6 +328,7 @@ class TestThreatFoxFetcher:
             mock_client_cls.return_value = mock_client
 
             from backend.ingestion.abusech_fetcher import fetch_threatfox_by_cve
+
             result = await fetch_threatfox_by_cve("CVE-2021-44228")
 
         assert result == []
@@ -316,8 +336,10 @@ class TestThreatFoxFetcher:
 
 # ── Async helpers ─────────────────────────────────────────────────────
 
+
 async def _async_return(val):
     return val
+
 
 async def _async_raise(exc):
     raise exc

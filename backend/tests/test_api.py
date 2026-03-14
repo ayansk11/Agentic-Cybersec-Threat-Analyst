@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, patch
 
 
-
 # ── Root & Health ────────────────────────────────────────────────────
 
 
@@ -214,17 +213,20 @@ class TestSchemas:
 
     def test_analysis_request_defaults(self):
         from backend.api.schemas import AnalysisRequest
+
         req = AnalysisRequest()
         assert req.cve_id == ""
         assert req.cve_description == ""
 
     def test_analysis_request_with_data(self):
         from backend.api.schemas import AnalysisRequest
+
         req = AnalysisRequest(cve_id="CVE-2021-44228", cve_description="Log4j RCE")
         assert req.cve_id == "CVE-2021-44228"
 
     def test_feed_item_schema(self):
         from backend.api.schemas import FeedItem
+
         item = FeedItem(
             cve_id="CVE-2024-0001",
             description="Test",
@@ -238,6 +240,7 @@ class TestSchemas:
 
     def test_otx_pulse_item_defaults(self):
         from backend.api.schemas import OTXPulseItem
+
         item = OTXPulseItem(pulse_id="abc", name="Test Pulse")
         assert item.description == ""
         assert item.tags == []
@@ -245,6 +248,7 @@ class TestSchemas:
 
     def test_threatfox_ioc_item_defaults(self):
         from backend.api.schemas import ThreatFoxIOCItem
+
         item = ThreatFoxIOCItem(ioc_type="ip:port", ioc_value="1.2.3.4:443")
         assert item.ioc_id == 0
         assert item.malware == ""
@@ -252,6 +256,7 @@ class TestSchemas:
 
     def test_dashboard_stats_defaults(self):
         from backend.api.schemas import DashboardStats
+
         stats = DashboardStats()
         assert stats.total_chunks == 0
         assert stats.ollama_connected is False

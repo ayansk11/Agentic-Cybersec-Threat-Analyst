@@ -34,18 +34,28 @@ class TestMeetsThreshold:
 
 
 class TestSendWebhook:
-    @patch("backend.webhooks._get_webhook_config", new_callable=AsyncMock, return_value=("", "HIGH"))
+    @patch(
+        "backend.webhooks._get_webhook_config", new_callable=AsyncMock, return_value=("", "HIGH")
+    )
     async def test_noop_when_no_url(self, mock_config):
         # Should return without error when no URL configured
         await send_webhook("CVE-2021-44228", "CRITICAL", "summary", [])
 
-    @patch("backend.webhooks._get_webhook_config", new_callable=AsyncMock, return_value=("https://example.com/hook", "HIGH"))
+    @patch(
+        "backend.webhooks._get_webhook_config",
+        new_callable=AsyncMock,
+        return_value=("https://example.com/hook", "HIGH"),
+    )
     async def test_noop_below_threshold(self, mock_config):
         # MEDIUM is below HIGH threshold
         await send_webhook("CVE-2024-0001", "MEDIUM", "summary", [])
 
     @patch("backend.webhooks.httpx.AsyncClient")
-    @patch("backend.webhooks._get_webhook_config", new_callable=AsyncMock, return_value=("https://example.com/hook", "HIGH"))
+    @patch(
+        "backend.webhooks._get_webhook_config",
+        new_callable=AsyncMock,
+        return_value=("https://example.com/hook", "HIGH"),
+    )
     async def test_sends_post(self, mock_config, mock_client_cls):
         mock_client = MagicMock()
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -68,7 +78,11 @@ class TestSendWebhook:
         assert payload["severity"] == "CRITICAL"
 
     @patch("backend.webhooks.httpx.AsyncClient")
-    @patch("backend.webhooks._get_webhook_config", new_callable=AsyncMock, return_value=("https://example.com/hook", "HIGH"))
+    @patch(
+        "backend.webhooks._get_webhook_config",
+        new_callable=AsyncMock,
+        return_value=("https://example.com/hook", "HIGH"),
+    )
     async def test_handles_http_error(self, mock_config, mock_client_cls):
         """Webhook errors should be caught, not raised."""
         mock_client = MagicMock()

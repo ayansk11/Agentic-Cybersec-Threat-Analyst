@@ -131,9 +131,7 @@ def attack_classifier_agent(state: ThreatAnalysisState) -> dict:
         return {
             "attack_techniques": [],
             "rag_context": "",
-            "messages": [
-                f"[Agent 2: ATT&CK Classifier] Qdrant unavailable for {cve_id}: {e}"
-            ],
+            "messages": [f"[Agent 2: ATT&CK Classifier] Qdrant unavailable for {cve_id}: {e}"],
         }
 
     # Step 3: Format RAG context

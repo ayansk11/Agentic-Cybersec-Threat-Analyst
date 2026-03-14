@@ -33,9 +33,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_access_token(user_id: int, email: str, role: str) -> str:
     """Create a short-lived JWT access token."""
     settings = get_settings()
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.jwt_access_expire_minutes
-    )
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_access_expire_minutes)
     payload = {
         "sub": str(user_id),
         "email": email,
@@ -83,9 +81,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 # Synthetic admin user for backward-compatible modes (API key / no auth)
-_SYNTHETIC_ADMIN = CurrentUser(
-    id=0, email="api-key@system", username="API Key", role="admin"
-)
+_SYNTHETIC_ADMIN = CurrentUser(id=0, email="api-key@system", username="API Key", role="admin")
 
 
 async def get_current_user(

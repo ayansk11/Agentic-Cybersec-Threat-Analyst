@@ -1,6 +1,5 @@
 """Tests for the RAG pipeline (chunker and retriever)."""
 
-
 from backend.rag.chunker import (
     chunk_techniques,
     chunk_mitigations,
@@ -146,8 +145,16 @@ class TestChunkRelationships:
             }
         ]
         id_lookup = {
-            "mitigation-1": {"external_id": "M1050", "name": "Exploit Protection", "entity_type": "mitigation"},
-            "attack-pattern-1": {"external_id": "T1190", "name": "Exploit Public-Facing App", "entity_type": "technique"},
+            "mitigation-1": {
+                "external_id": "M1050",
+                "name": "Exploit Protection",
+                "entity_type": "mitigation",
+            },
+            "attack-pattern-1": {
+                "external_id": "T1190",
+                "name": "Exploit Public-Facing App",
+                "entity_type": "technique",
+            },
         }
         chunks = chunk_relationships(relationships, id_lookup)
         assert len(chunks) == 1
@@ -166,7 +173,11 @@ class TestChunkRelationships:
         ]
         id_lookup = {
             "group-1": {"external_id": "G0016", "name": "APT29", "entity_type": "group"},
-            "attack-pattern-1": {"external_id": "T1059", "name": "Command Interpreter", "entity_type": "technique"},
+            "attack-pattern-1": {
+                "external_id": "T1059",
+                "name": "Command Interpreter",
+                "entity_type": "technique",
+            },
         }
         chunks = chunk_relationships(relationships, id_lookup)
         assert "Group G0016" in chunks[0]["text"]
@@ -181,8 +192,16 @@ class TestChunkRelationships:
             }
         ]
         id_lookup = {
-            "software-1": {"external_id": "S0154", "name": "Cobalt Strike", "entity_type": "software"},
-            "attack-pattern-1": {"external_id": "T1059", "name": "Command Interpreter", "entity_type": "technique"},
+            "software-1": {
+                "external_id": "S0154",
+                "name": "Cobalt Strike",
+                "entity_type": "software",
+            },
+            "attack-pattern-1": {
+                "external_id": "T1059",
+                "name": "Command Interpreter",
+                "entity_type": "technique",
+            },
         }
         chunks = chunk_relationships(relationships, id_lookup)
         assert "Software S0154" in chunks[0]["text"]

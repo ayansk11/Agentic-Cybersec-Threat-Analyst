@@ -79,16 +79,16 @@ def cve_extractor_agent(state: ThreatAnalysisState) -> dict:
         )
 
     if in_kev:
-        enrichment_context += "\n- CISA KEV: YES — This vulnerability is actively exploited in the wild."
+        enrichment_context += (
+            "\n- CISA KEV: YES — This vulnerability is actively exploited in the wild."
+        )
 
     # Enrich with AlienVault OTX
     otx_pulses: list[dict] = []
     otx_iocs: list[dict] = []
     if cve_id and cve_id.startswith("CVE-"):
         try:
-            otx_pulses = asyncio.get_event_loop().run_until_complete(
-                fetch_otx_pulse_by_cve(cve_id)
-            )
+            otx_pulses = asyncio.get_event_loop().run_until_complete(fetch_otx_pulse_by_cve(cve_id))
         except RuntimeError:
             otx_pulses = asyncio.run(fetch_otx_pulse_by_cve(cve_id))
         for pulse in otx_pulses:
@@ -112,16 +112,14 @@ def cve_extractor_agent(state: ThreatAnalysisState) -> dict:
             threatfox_iocs = asyncio.run(fetch_threatfox_by_cve(cve_id))
 
     if threatfox_iocs:
-        malware_families = set(
-            i.get("malware", "") for i in threatfox_iocs if i.get("malware")
-        )
-        enrichment_context += (
-            f"\n- ThreatFox IOCs: {len(threatfox_iocs)} indicators found"
-        )
+        malware_families = set(i.get("malware", "") for i in threatfox_iocs if i.get("malware"))
+        enrichment_context += f"\n- ThreatFox IOCs: {len(threatfox_iocs)} indicators found"
         if malware_families:
             enrichment_context += f"\n- Malware families: {', '.join(malware_families)}"
 
-    user_prompt = f"Analyze this CVE:\n\nCVE ID: {cve_id}\nDescription: {cve_description}{enrichment_context}"
+    user_prompt = (
+        f"Analyze this CVE:\n\nCVE ID: {cve_id}\nDescription: {cve_description}{enrichment_context}"
+    )
 
     # Call LLM
     llm = get_llm()

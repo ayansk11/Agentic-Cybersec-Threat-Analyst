@@ -3,7 +3,6 @@
 from unittest.mock import patch, MagicMock, AsyncMock
 
 
-
 class TestCVECache:
     async def test_cache_hit_skips_http(self):
         """Second call to fetch_cve should return cached result without HTTP call."""

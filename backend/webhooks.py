@@ -22,9 +22,7 @@ async def _get_webhook_config() -> tuple[str, str]:
     try:
         from backend.db_users import get_app_settings_bulk
 
-        db_settings = await get_app_settings_bulk(
-            ["webhook_url", "webhook_severity_threshold"]
-        )
+        db_settings = await get_app_settings_bulk(["webhook_url", "webhook_severity_threshold"])
         url = db_settings.get("webhook_url", "")
         threshold = db_settings.get("webhook_severity_threshold", "")
     except Exception:
@@ -39,9 +37,7 @@ async def _get_webhook_config() -> tuple[str, str]:
     return url, threshold
 
 
-async def send_webhook(
-    cve_id: str, severity: str, summary: str, techniques: list[dict]
-) -> None:
+async def send_webhook(cve_id: str, severity: str, summary: str, techniques: list[dict]) -> None:
     """POST analysis summary to the configured webhook URL."""
     url, threshold = await _get_webhook_config()
     if not url:
@@ -55,8 +51,7 @@ async def send_webhook(
         "severity": severity,
         "summary": summary,
         "techniques": [
-            {"id": t.get("technique_id"), "name": t.get("name")}
-            for t in techniques[:10]
+            {"id": t.get("technique_id"), "name": t.get("name")} for t in techniques[:10]
         ],
     }
     try:
@@ -67,9 +62,7 @@ async def send_webhook(
         logger.warning("Webhook delivery failed for %s", cve_id, exc_info=True)
 
 
-def fire_webhook(
-    cve_id: str, severity: str, summary: str, techniques: list[dict]
-) -> None:
+def fire_webhook(cve_id: str, severity: str, summary: str, techniques: list[dict]) -> None:
     """Fire-and-forget webhook (non-blocking)."""
     try:
         loop = asyncio.get_running_loop()
