@@ -6,25 +6,74 @@ Built with LangGraph for agent orchestration, Qdrant for vector search, and a lo
 
 ## Architecture
 
+> **Interactive version:** Open [`docs/architecture.html`](docs/architecture.html) locally for an animated, clickable diagram with detailed node descriptions.
+
 ```mermaid
 flowchart LR
-    User([User]) --> Frontend[React Frontend]
-    Frontend -->|SSE Stream| Backend[FastAPI Backend]
+    subgraph Client["  Client"]
+        User(["  User  "])
+        Frontend["  React Frontend  "]
+    end
 
-    Backend --> A1[Agent 1: CVE Extractor]
-    A1 --> A2[Agent 2: ATT&CK Classifier]
-    A2 --> A3[Agent 3: Playbook Generator]
+    subgraph Gateway["  API Gateway"]
+        Backend["  FastAPI  \n  SSE + JWT + OAuth2  "]
+    end
 
-    A1 -->|Enrich| NVD[(NVD API)]
-    A1 -->|Enrich| KEV[(CISA KEV)]
-    A1 -->|Enrich| OTX[(AlienVault OTX)]
-    A1 -->|Enrich| TFox[(ThreatFox)]
+    subgraph Pipeline["  LangGraph Agent Pipeline"]
+        A1["  Agent 1  \n  CVE Extractor  "]
+        A2["  Agent 2  \n  ATT&CK Classifier  "]
+        A3["  Agent 3  \n  Playbook Generator  "]
+    end
 
-    A2 -->|Hybrid Search| Qdrant[(Qdrant Vector DB)]
-    A2 -->|Classify| LLM[Ollama LLM]
-    A3 -->|Generate| LLM
+    subgraph Intel["  Threat Intelligence"]
+        NVD[("  NVD API  ")]
+        KEV[("  CISA KEV  ")]
+        OTX[("  AlienVault OTX  ")]
+        TFox[("  ThreatFox  ")]
+    end
 
-    Qdrant -.->|19K+ ATT&CK chunks| MITRE[MITRE ATT&CK v18.1]
+    subgraph Infra["  Infrastructure"]
+        Qdrant[("  Qdrant  \n  Vector DB  ")]
+        LLM["  Ollama LLM  \n  Foundation-Sec-8B  "]
+        MITRE["  MITRE ATT&CK  \n  v18.1 · 19K chunks  "]
+    end
+
+    User --> Frontend
+    Frontend -->|"SSE Stream"| Backend
+    Backend --> A1
+
+    A1 -->|"Enrich"| NVD
+    A1 -->|"Enrich"| KEV
+    A1 -->|"Enrich"| OTX
+    A1 -->|"Enrich"| TFox
+
+    A1 --> A2
+    A2 -->|"Hybrid Search"| Qdrant
+    A2 -->|"Classify"| LLM
+    Qdrant -.->|"Dense + Sparse"| MITRE
+
+    A2 --> A3
+    A3 -->|"Generate"| LLM
+
+    style Client fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#58a6ff
+    style Gateway fill:#161b22,stroke:#3fb950,stroke-width:2px,color:#3fb950
+    style Pipeline fill:#161b22,stroke:#bc8cff,stroke-width:2px,color:#bc8cff
+    style Intel fill:#161b22,stroke:#d29922,stroke-width:2px,color:#d29922
+    style Infra fill:#161b22,stroke:#39d2c0,stroke-width:2px,color:#39d2c0
+
+    style User fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
+    style Frontend fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
+    style Backend fill:#3fb95022,stroke:#3fb950,color:#e6edf3
+    style A1 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
+    style A2 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
+    style A3 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
+    style NVD fill:#d2992222,stroke:#d29922,color:#e6edf3
+    style KEV fill:#d2992222,stroke:#d29922,color:#e6edf3
+    style OTX fill:#d2992222,stroke:#d29922,color:#e6edf3
+    style TFox fill:#d2992222,stroke:#d29922,color:#e6edf3
+    style Qdrant fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
+    style LLM fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
+    style MITRE fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
 ```
 
 ### Agent Pipeline

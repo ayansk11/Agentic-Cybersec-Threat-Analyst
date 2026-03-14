@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — Agentic Cybersecurity Threat Analyst</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --blue: #58a6ff;
+    --green: #3fb950;
+    --purple: #bc8cff;
+    --orange: #d29922;
+    --red: #f85149;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; overflow-x: hidden; }
+
+  header { text-align: center; padding: 40px 20px 20px; }
+  header h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+  header p { color: var(--muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
+
+  .controls { display: flex; justify-content: center; gap: 12px; padding: 16px; flex-wrap: wrap; }
+  .controls button {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s;
+  }
+  .controls button:hover { border-color: var(--blue); color: var(--blue); }
+  .controls button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  .canvas-wrap { width: 100%; display: flex; justify-content: center; padding: 20px; }
+  canvas { border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+
+  .legend { display: flex; justify-content: center; gap: 24px; padding: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .info-panel {
+    max-width: 900px; margin: 20px auto; padding: 24px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    display: none;
+  }
+  .info-panel.visible { display: block; }
+  .info-panel h3 { margin-bottom: 8px; font-size: 16px; }
+  .info-panel p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .info-panel .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .info-panel .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+  footer { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--blue); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>System Architecture</h1>
+  <p>Click on any node to see details. Use the controls to animate data flow through the pipeline.</p>
+</header>
+
+<div class="controls">
+  <button id="btn-reset" class="active">Overview</button>
+  <button id="btn-animate">Animate Pipeline</button>
+  <button id="btn-agent1">Agent 1: CVE Extractor</button>
+  <button id="btn-agent2">Agent 2: ATT&CK Classifier</button>
+  <button id="btn-agent3">Agent 3: Playbook Generator</button>
+</div>
+
+<div class="canvas-wrap">
+  <canvas id="arch" width="1100" height="620"></canvas>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Frontend</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Backend API</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>AI Agents</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Threat Intel Sources</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Vector DB / LLM</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>Data Flow</div>
+</div>
+
+<div class="info-panel" id="info">
+  <h3 id="info-title"></h3>
+  <p id="info-desc"></p>
+  <div class="tags" id="info-tags"></div>
+</div>
+
+<footer>
+  <a href="https://github.com/ayansk11/Agentic_Cybersec_Threat_Analyst">View on GitHub</a>
+</footer>
+
+<script>
+const canvas = document.getElementById('arch');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+
+canvas.width = 1100 * dpr;
+canvas.height = 620 * dpr;
+canvas.style.width = '1100px';
+canvas.style.height = '620px';
+ctx.scale(dpr, dpr);
+
+const C = {
+  bg: '#161b22', surface: '#1c2128', border: '#30363d', text: '#e6edf3', muted: '#8b949e',
+  blue: '#58a6ff', green: '#3fb950', purple: '#bc8cff', orange: '#d29922',
+  red: '#f85149', cyan: '#39d2c0', pink: '#f778ba',
+  blueDim: 'rgba(88,166,255,0.15)', greenDim: 'rgba(63,185,80,0.15)',
+  purpleDim: 'rgba(188,140,255,0.15)', orangeDim: 'rgba(210,153,34,0.15)',
+  cyanDim: 'rgba(57,210,192,0.15)',
+};
+
+const nodeData = [
+  { id: 'user', x: 60, y: 290, w: 90, h: 44, label: 'User', icon: '\u{1F464}', color: C.blue, fill: C.blueDim, group: 'frontend',
+    title: 'User', desc: 'Security analyst or SOC operator who submits CVE IDs for analysis and reviews generated playbooks and detection rules.', tags: ['Input', 'CVE-ID'] },
+  { id: 'frontend', x: 195, y: 290, w: 120, h: 44, label: 'React Frontend', icon: '\u269B\uFE0F', color: C.blue, fill: C.blueDim, group: 'frontend',
+    title: 'React Frontend', desc: 'Single-page application built with React 19, TypeScript, Tailwind CSS 4, and Recharts. Features real-time SSE streaming, threat feed dashboard, and analysis result visualization.', tags: ['React 19', 'TypeScript', 'Vite', 'Tailwind CSS', 'SSE'] },
+  { id: 'backend', x: 385, y: 290, w: 120, h: 44, label: 'FastAPI Backend', icon: '\u26A1', color: C.green, fill: C.greenDim, group: 'backend',
+    title: 'FastAPI Backend', desc: 'REST API with SSE streaming, JWT/OAuth2 authentication, rate limiting, caching, Prometheus metrics, and structured logging. Orchestrates the LangGraph agent pipeline.', tags: ['FastAPI', 'SSE', 'JWT', 'OAuth2', 'Prometheus'] },
+  { id: 'agent1', x: 570, y: 175, w: 150, h: 50, label: 'Agent 1\nCVE Extractor', icon: '\u{1F50D}', color: C.purple, fill: C.purpleDim, group: 'agents',
+    title: 'Agent 1: CVE Extractor', desc: 'Parses CVE IDs, enriches via NVD API (CVSS scores, CWEs, affected products), checks CISA KEV for active exploitation, pulls OTX pulses and ThreatFox IOCs. Uses LLM to extract structured threat intelligence.', tags: ['NVD', 'CISA KEV', 'OTX', 'ThreatFox', 'LLM'] },
+  { id: 'agent2', x: 570, y: 290, w: 150, h: 50, label: 'Agent 2\nATT&CK Classifier', icon: '\u{1F3AF}', color: C.purple, fill: C.purpleDim, group: 'agents',
+    title: 'Agent 2: ATT&CK Classifier', desc: 'Performs hybrid search (dense BGE-M3 + sparse vectors with RRF) over 19K+ MITRE ATT&CK chunks. Maps vulnerability to techniques with confidence scores and tactical rationale.', tags: ['RAG', 'BGE-M3', 'Hybrid Search', 'RRF', 'MITRE ATT&CK'] },
+  { id: 'agent3', x: 570, y: 405, w: 150, h: 50, label: 'Agent 3\nPlaybook Generator', icon: '\u{1F4CB}', color: C.purple, fill: C.purpleDim, group: 'agents',
+    title: 'Agent 3: Playbook Generator', desc: 'Generates NIST SP 800-61 compliant incident response playbooks with detection, containment, eradication, and recovery steps. Also produces Sigma YAML detection rules ready for SIEM deployment.', tags: ['NIST 800-61', 'Sigma Rules', 'Playbook', 'LLM'] },
+  { id: 'nvd', x: 810, y: 80, w: 90, h: 38, label: 'NVD API', icon: '\u{1F3DB}\uFE0F', color: C.orange, fill: C.orangeDim, group: 'intel',
+    title: 'NVD API 2.0', desc: 'National Vulnerability Database. Provides CVE details, CVSS v3.1 scores, severity, CWEs, and affected product CPEs. Optional API key increases rate from 5 to 50 requests/30s.', tags: ['CVSS', 'CWE', 'CPE', 'Free'] },
+  { id: 'kev', x: 920, y: 80, w: 90, h: 38, label: 'CISA KEV', icon: '\u26A0\uFE0F', color: C.orange, fill: C.orangeDim, group: 'intel',
+    title: 'CISA KEV Catalog', desc: 'Known Exploited Vulnerabilities catalog maintained by CISA. Flags CVEs with confirmed active exploitation in the wild. No authentication required.', tags: ['Active Exploitation', 'No Auth'] },
+  { id: 'otx', x: 810, y: 140, w: 90, h: 38, label: 'OTX', icon: '\u{1F310}', color: C.orange, fill: C.orangeDim, group: 'intel',
+    title: 'AlienVault OTX', desc: 'Open Threat Exchange. Provides community-driven threat intelligence pulses with IOCs, adversary info, and targeted industry data. Free API key required.', tags: ['Pulses', 'IOCs', 'Free API Key'] },
+  { id: 'threatfox', x: 920, y: 140, w: 90, h: 38, label: 'ThreatFox', icon: '\u{1F98A}', color: C.orange, fill: C.orangeDim, group: 'intel',
+    title: 'abuse.ch ThreatFox', desc: 'Community-driven malware IOC sharing platform by abuse.ch. Provides file hashes, URLs, domains, and IP addresses associated with malware families. No auth needed.', tags: ['Malware IOCs', 'No Auth'] },
+  { id: 'qdrant', x: 810, y: 280, w: 100, h: 44, label: 'Qdrant', icon: '\u{1F52E}', color: C.cyan, fill: C.cyanDim, group: 'infra',
+    title: 'Qdrant Vector Database', desc: 'Stores 19,233 MITRE ATT&CK chunks with hybrid dense (1024-dim BGE-M3) + sparse vectors. Supports hybrid search with Reciprocal Rank Fusion for optimal retrieval.', tags: ['19K+ chunks', 'Hybrid Search', 'BGE-M3', 'Docker'] },
+  { id: 'mitre', x: 950, y: 280, w: 100, h: 44, label: 'ATT&CK v18.1', icon: '\u{1F6E1}\uFE0F', color: C.cyan, fill: C.cyanDim, group: 'infra',
+    title: 'MITRE ATT&CK v18.1', desc: '691 techniques, 44 mitigations, 784 software entries, 172 groups, 17,542 relationships. All chunked and embedded into Qdrant with entity-level granularity.', tags: ['691 Techniques', '784 Software', '172 Groups', 'STIX'] },
+  { id: 'llm', x: 870, y: 405, w: 140, h: 44, label: 'Ollama LLM', icon: '\u{1F9E0}', color: C.cyan, fill: C.cyanDim, group: 'infra',
+    title: 'Ollama - Foundation-Sec-8B', desc: 'Local security-focused LLM (Foundation-Sec-8B-Reasoning, Q4_K_M quantization). Runs entirely on your machine via Ollama. No API keys, no data leaves your network.', tags: ['8B Parameters', 'Q4_K_M', 'Local', 'Apple Metal'] },
+];
+
+const edges = [
+  { from: 'user', to: 'frontend', label: '', color: C.muted },
+  { from: 'frontend', to: 'backend', label: 'SSE Stream', color: C.blue },
+  { from: 'backend', to: 'agent1', label: '', color: C.green },
+  { from: 'agent1', to: 'agent2', label: '', color: C.purple },
+  { from: 'agent2', to: 'agent3', label: '', color: C.purple },
+  { from: 'agent1', to: 'nvd', label: 'Enrich', color: C.orange },
+  { from: 'agent1', to: 'kev', label: '', color: C.orange },
+  { from: 'agent1', to: 'otx', label: '', color: C.orange },
+  { from: 'agent1', to: 'threatfox', label: '', color: C.orange },
+  { from: 'agent2', to: 'qdrant', label: 'Hybrid Search', color: C.cyan },
+  { from: 'qdrant', to: 'mitre', label: '', color: C.cyan, dashed: true },
+  { from: 'agent2', to: 'llm', label: 'Classify', color: C.cyan },
+  { from: 'agent3', to: 'llm', label: 'Generate', color: C.cyan },
+];
+
+function getNode(id) { return nodeData.find(function(n) { return n.id === id; }); }
+function nodeCenter(n) { return { x: n.x + n.w / 2, y: n.y + n.h / 2 }; }
+
+function roundRect(x, y, w, h, r, fillColor, strokeColor, lw) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  if (fillColor) { ctx.fillStyle = fillColor; ctx.fill(); }
+  if (strokeColor) { ctx.strokeStyle = strokeColor; ctx.lineWidth = lw || 1.5; ctx.stroke(); }
+}
+
+function edgePoints(e) {
+  var a = getNode(e.from), b = getNode(e.to);
+  var ca = nodeCenter(a), cb = nodeCenter(b);
+  var angle = Math.atan2(cb.y - ca.y, cb.x - ca.x);
+  var x1, y1, x2, y2;
+  if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
+    x1 = ca.x + (Math.cos(angle) > 0 ? a.w / 2 : -a.w / 2); y1 = ca.y;
+    x2 = cb.x + (Math.cos(angle) > 0 ? -b.w / 2 : b.w / 2); y2 = cb.y;
+  } else {
+    x1 = ca.x; y1 = ca.y + (Math.sin(angle) > 0 ? a.h / 2 : -a.h / 2);
+    x2 = cb.x; y2 = cb.y + (Math.sin(angle) > 0 ? -b.h / 2 : b.h / 2);
+  }
+  return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+function drawArrow(x1, y1, x2, y2, color, dashed, label, progress) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = 1.8;
+  if (dashed) ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.setLineDash([]);
+  var angle = Math.atan2(y2 - y1, x2 - x1);
+  var aLen = 8;
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - aLen * Math.cos(angle - 0.4), y2 - aLen * Math.sin(angle - 0.4));
+  ctx.lineTo(x2 - aLen * Math.cos(angle + 0.4), y2 - aLen * Math.sin(angle + 0.4));
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+  if (label) {
+    var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(label, mx, my - 5);
+  }
+  if (progress !== undefined && progress >= 0 && progress <= 1) {
+    var dx = x1 + (x2 - x1) * progress, dy = y1 + (y2 - y1) * progress;
+    ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.beginPath(); ctx.arc(dx, dy, 7, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fill();
+  }
+  ctx.restore();
+}
+
+var edgeOrder = ['user-frontend', 'frontend-backend', 'backend-agent1',
+  'agent1-nvd', 'agent1-kev', 'agent1-otx', 'agent1-threatfox',
+  'agent1-agent2', 'agent2-qdrant', 'qdrant-mitre', 'agent2-llm',
+  'agent2-agent3', 'agent3-llm'];
+
+function getEdgePhase(e) { return edgeOrder.indexOf(e.from + '-' + e.to); }
+
+var hoveredNode = null, selectedNode = null, animPhase = -1, animTime = 0;
+
+function draw() {
+  ctx.clearRect(0, 0, 1100, 620);
+  ctx.font = 'bold 11px -apple-system, sans-serif';
+  ctx.fillStyle = C.muted; ctx.textAlign = 'left';
+  ctx.fillText('CLIENT', 65, 265);
+  ctx.fillText('API GATEWAY', 390, 265);
+  ctx.fillText('AGENT PIPELINE', 590, 155);
+  ctx.fillText('THREAT INTELLIGENCE', 835, 65);
+  ctx.fillText('INFRASTRUCTURE', 870, 265);
+
+  edges.forEach(function(e) {
+    var pts = edgePoints(e);
+    var progress;
+    if (animPhase >= 0) {
+      var ep = getEdgePhase(e);
+      if (ep === animPhase) progress = animTime;
+    }
+    drawArrow(pts.x1, pts.y1, pts.x2, pts.y2, e.color, e.dashed, e.label, progress);
+  });
+
+  nodeData.forEach(function(n) {
+    var isHovered = hoveredNode === n.id;
+    var isSelected = selectedNode === n.id;
+    if (isHovered || isSelected) { ctx.shadowColor = n.color; ctx.shadowBlur = 16; }
+    roundRect(n.x, n.y, n.w, n.h, 8, n.fill, n.color, isSelected ? 2.5 : 1.5);
+    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+    var lines = n.label.split('\n');
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var cx = n.x + n.w / 2, cy = n.y + n.h / 2;
+    if (lines.length === 1) {
+      ctx.font = '13px -apple-system, sans-serif'; ctx.fillStyle = n.color;
+      ctx.fillText(n.icon + ' ' + lines[0], cx, cy);
+    } else {
+      ctx.font = 'bold 12px -apple-system, sans-serif'; ctx.fillStyle = n.color;
+      ctx.fillText(n.icon + ' ' + lines[0], cx, cy - 8);
+      ctx.font = '11px -apple-system, sans-serif'; ctx.fillStyle = C.text;
+      ctx.fillText(lines[1], cx, cy + 8);
+    }
+  });
+}
+
+var PHASE_DURATION = 600, TOTAL_PHASES = 13, lastTime = 0;
+function animate(ts) {
+  if (animPhase >= 0) {
+    var elapsed = ts - lastTime;
+    animTime += elapsed / PHASE_DURATION;
+    if (animTime > 1) { animTime = 0; animPhase++; if (animPhase >= TOTAL_PHASES) animPhase = 0; }
+  }
+  lastTime = ts; draw(); requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+canvas.addEventListener('mousemove', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  hoveredNode = null;
+  for (var i = 0; i < nodeData.length; i++) {
+    var n = nodeData[i];
+    if (mx >= n.x && mx <= n.x + n.w && my >= n.y && my <= n.y + n.h) {
+      hoveredNode = n.id; canvas.style.cursor = 'pointer'; break;
+    }
+  }
+  if (!hoveredNode) canvas.style.cursor = 'default';
+});
+
+canvas.addEventListener('click', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  selectedNode = null;
+  for (var i = 0; i < nodeData.length; i++) {
+    var n = nodeData[i];
+    if (mx >= n.x && mx <= n.x + n.w && my >= n.y && my <= n.y + n.h) {
+      selectedNode = n.id; showInfo(n); break;
+    }
+  }
+  if (!selectedNode) hideInfo();
+});
+
+function showInfo(n) {
+  var panel = document.getElementById('info');
+  var titleEl = document.getElementById('info-title');
+  var descEl = document.getElementById('info-desc');
+  var tagsEl = document.getElementById('info-tags');
+  titleEl.textContent = n.title;
+  titleEl.style.color = n.color;
+  descEl.textContent = n.desc;
+  // Build tags safely using DOM methods
+  while (tagsEl.firstChild) tagsEl.removeChild(tagsEl.firstChild);
+  n.tags.forEach(function(t) {
+    var span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t;
+    span.style.background = n.color + '22';
+    span.style.color = n.color;
+    span.style.border = '1px solid ' + n.color + '44';
+    tagsEl.appendChild(span);
+  });
+  panel.classList.add('visible');
+}
+
+function hideInfo() { document.getElementById('info').classList.remove('visible'); }
+
+function setActive(id) {
+  document.querySelectorAll('.controls button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('btn-reset').addEventListener('click', function() {
+  animPhase = -1; selectedNode = null; hideInfo(); setActive('btn-reset');
+});
+document.getElementById('btn-animate').addEventListener('click', function() {
+  animPhase = 0; animTime = 0; selectedNode = null; hideInfo(); setActive('btn-animate');
+});
+document.getElementById('btn-agent1').addEventListener('click', function() {
+  animPhase = -1; selectedNode = 'agent1'; showInfo(getNode('agent1')); setActive('btn-agent1');
+});
+document.getElementById('btn-agent2').addEventListener('click', function() {
+  animPhase = -1; selectedNode = 'agent2'; showInfo(getNode('agent2')); setActive('btn-agent2');
+});
+document.getElementById('btn-agent3').addEventListener('click', function() {
+  animPhase = -1; selectedNode = 'agent3'; showInfo(getNode('agent3')); setActive('btn-agent3');
+});
+</script>
+</body>
+</html>
