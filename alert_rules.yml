@@ -1,0 +1,29 @@
+groups:
+  - name: threat_analyst
+    rules:
+      - alert: HighAnalysisErrorRate
+        expr: rate(agent_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High agent error rate"
+          description: "Agent error rate is {{ $value }}/s over the last 5 minutes."
+
+      - alert: HighResponseLatency
+        expr: histogram_quantile(0.95, rate(threat_analysis_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High analysis latency"
+          description: "95th percentile analysis duration is {{ $value }}s."
+
+      - alert: BackendDown
+        expr: up{job="threat-analyst"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend is down"
+          description: "The threat analyst backend has been unreachable for 1 minute."

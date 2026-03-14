@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.so
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# Data (large files)
+data/*.json
+data/*.csv
+data/*.db
+!data/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+qdrant_data/
+
+# Local config
+.claude/
+CLAUDE.md
+
+# Misc
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/

@@ -1,0 +1,87 @@
+services:
+  # Vector database for MITRE ATT&CK knowledge base
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/localhost/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # FastAPI backend with LangGraph agent pipeline
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - OLLAMA_HOST=host.docker.internal:11434
+      - OTX_API_KEY=${OTX_API_KEY:-}
+      - NVD_API_KEY=${NVD_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-hf.co/fdtn-ai/Foundation-Sec-8B-Reasoning-Q4_K_M-GGUF}
+      - API_KEY=${API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
+      - WEBHOOK_SEVERITY_THRESHOLD=${WEBHOOK_SEVERITY_THRESHOLD:-HIGH}
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+    volumes:
+      - analysis_data:/app/data
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # React frontend served via nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  # Prometheus monitoring (optional, start with --profile monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+    profiles:
+      - monitoring
+    restart: unless-stopped
+
+volumes:
+  qdrant_data:
+  analysis_data:

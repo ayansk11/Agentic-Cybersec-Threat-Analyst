@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Environment files with secrets
+.env
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+.ruff_cache
+
+# Node
+frontend/node_modules
+frontend/dist
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Data caches (will be regenerated)
+data/*.json
+
+# Docker
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# Local config
+.claude
