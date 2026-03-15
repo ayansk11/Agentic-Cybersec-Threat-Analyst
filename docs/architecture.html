@@ -6,53 +6,54 @@
 <title>Architecture — Agentic Cybersecurity Threat Analyst</title>
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --blue: #58a6ff;
-    --green: #3fb950;
-    --purple: #bc8cff;
-    --orange: #d29922;
-    --red: #f85149;
-    --cyan: #39d2c0;
-    --pink: #f778ba;
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --blue: #58a6ff; --green: #3fb950; --purple: #bc8cff;
+    --orange: #d29922; --red: #f85149; --cyan: #39d2c0; --pink: #f778ba;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; overflow-x: hidden; }
-
-  header { text-align: center; padding: 40px 20px 20px; }
-  header h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
-  header p { color: var(--muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
-
-  .controls { display: flex; justify-content: center; gap: 12px; padding: 16px; flex-wrap: wrap; }
+  header { text-align: center; padding: 40px 20px 10px; }
+  header h1 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+  header p { color: var(--muted); font-size: 14px; max-width: 550px; margin: 0 auto; }
+  .controls { display: flex; justify-content: center; gap: 10px; padding: 16px; flex-wrap: wrap; }
   .controls button {
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
-    padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s;
+    padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s;
   }
   .controls button:hover { border-color: var(--blue); color: var(--blue); }
   .controls button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .diagram-wrap { display: flex; justify-content: center; padding: 10px 20px; overflow-x: auto; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
 
-  .canvas-wrap { width: 100%; display: flex; justify-content: center; padding: 20px; }
-  canvas { border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+  .node { cursor: pointer; transition: filter 0.25s; }
+  .node:hover .node-bg { filter: brightness(1.3); }
+  .node:hover .node-border { stroke-width: 2.5; }
+  .node.selected .node-border { stroke-width: 3; }
+  .node.selected .node-bg { filter: brightness(1.4); }
 
-  .legend { display: flex; justify-content: center; gap: 24px; padding: 20px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  @keyframes flow { 0% { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+  .particle { offset-rotate: 0deg; animation: flow 1.2s linear forwards; }
+
+  @keyframes pulse-ring { 0% { r: 18; opacity: 0.6; } 100% { r: 32; opacity: 0; } }
+  .pulse { animation: pulse-ring 1s ease-out infinite; }
 
   .info-panel {
-    max-width: 900px; margin: 20px auto; padding: 24px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    display: none;
+    max-width: 800px; margin: 16px auto; padding: 20px 24px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    display: none; transition: all 0.3s;
   }
   .info-panel.visible { display: block; }
-  .info-panel h3 { margin-bottom: 8px; font-size: 16px; }
-  .info-panel p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .info-panel h3 { margin-bottom: 6px; font-size: 15px; }
+  .info-panel p { color: var(--muted); font-size: 13px; line-height: 1.6; }
   .info-panel .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
   .info-panel .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
 
-  footer { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+  .legend { display: flex; justify-content: center; gap: 20px; padding: 12px 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  footer { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 13px; }
   footer a { color: var(--blue); text-decoration: none; }
 </style>
 </head>
@@ -60,7 +61,7 @@
 
 <header>
   <h1>System Architecture</h1>
-  <p>Click on any node to see details. Use the controls to animate data flow through the pipeline.</p>
+  <p>Click any node for details. Animate to watch data flow through the 3-agent pipeline.</p>
 </header>
 
 <div class="controls">
@@ -71,8 +72,206 @@
   <button id="btn-agent3">Agent 3: Playbook Generator</button>
 </div>
 
-<div class="canvas-wrap">
-  <canvas id="arch" width="1100" height="620"></canvas>
+<div class="diagram-wrap">
+<svg id="diagram" viewBox="0 0 1100 560" width="1100" height="560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-muted" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#8b949e"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#3fb950"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#bc8cff"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#d29922"/>
+    </marker>
+    <marker id="arrow-cyan" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#39d2c0"/>
+    </marker>
+    <filter id="glow-blue"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#58a6ff" flood-opacity="0.5"/></filter>
+    <filter id="glow-green"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#3fb950" flood-opacity="0.5"/></filter>
+    <filter id="glow-purple"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#bc8cff" flood-opacity="0.5"/></filter>
+    <filter id="glow-orange"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#d29922" flood-opacity="0.5"/></filter>
+    <filter id="glow-cyan"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#39d2c0" flood-opacity="0.5"/></filter>
+  </defs>
+
+  <!-- ── Subgraph backgrounds ── -->
+  <rect x="22" y="215" width="220" height="100" rx="12" fill="none" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="34" y="233" fill="#58a6ff" font-size="10" font-weight="600" opacity="0.5">CLIENT</text>
+
+  <rect x="262" y="215" width="140" height="100" rx="12" fill="none" stroke="#3fb950" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="274" y="233" fill="#3fb950" font-size="10" font-weight="600" opacity="0.5">API GATEWAY</text>
+
+  <rect x="422" y="195" width="430" height="140" rx="12" fill="none" stroke="#bc8cff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="434" y="213" fill="#bc8cff" font-size="10" font-weight="600" opacity="0.5">AGENT PIPELINE</text>
+
+  <rect x="450" y="20" width="440" height="120" rx="12" fill="none" stroke="#d29922" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="462" y="38" fill="#d29922" font-size="10" font-weight="600" opacity="0.5">THREAT INTELLIGENCE</text>
+
+  <rect x="490" y="410" width="400" height="120" rx="12" fill="none" stroke="#39d2c0" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="502" y="428" fill="#39d2c0" font-size="10" font-weight="600" opacity="0.5">INFRASTRUCTURE</text>
+
+  <!-- ── EDGES ── -->
+  <g id="edges">
+    <!-- User -> Frontend -->
+    <line id="e-user-frontend" x1="92" y1="270" x2="118" y2="270" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow-muted)"/>
+
+    <!-- Frontend -> Backend -->
+    <line id="e-frontend-backend" x1="218" y1="270" x2="272" y2="270" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <text x="245" y="260" fill="#58a6ff" font-size="9" text-anchor="middle">SSE Stream</text>
+
+    <!-- Backend -> Agent1 -->
+    <line id="e-backend-agent1" x1="392" y1="270" x2="432" y2="270" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+    <!-- Agent1 -> Agent2 -->
+    <line id="e-a1-a2" x1="562" y1="270" x2="592" y2="270" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+
+    <!-- Agent2 -> Agent3 -->
+    <line id="e-a2-a3" x1="722" y1="270" x2="752" y2="270" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+
+    <!-- Agent1 -> NVD (diagonal fan-out, no crossing) -->
+    <line id="e-a1-nvd" x1="470" y1="240" x2="500" y2="130" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+
+    <!-- Agent1 -> KEV -->
+    <line id="e-a1-kev" x1="485" y1="240" x2="620" y2="130" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+
+    <!-- Agent1 -> OTX -->
+    <line id="e-a1-otx" x1="510" y1="240" x2="740" y2="130" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+
+    <!-- Agent1 -> ThreatFox -->
+    <line id="e-a1-tf" x1="535" y1="240" x2="860" y2="130" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+
+    <!-- "Enrich" label near fan origin -->
+    <text x="455" y="195" fill="#d29922" font-size="9" text-anchor="end">Enrich</text>
+
+    <!-- Agent2 -> Qdrant -->
+    <path id="e-a2-qdrant" d="M640,300 L640,360 L560,360 L560,440" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="595" y="378" fill="#39d2c0" font-size="9">Hybrid Search</text>
+
+    <!-- Agent2 -> LLM (classify) -->
+    <path id="e-a2-llm" d="M680,300 L680,370 L800,370 L800,440" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="730" y="388" fill="#39d2c0" font-size="9">Classify</text>
+
+    <!-- Agent3 -> LLM (generate) -->
+    <path id="e-a3-llm" d="M820,300 L820,440" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="828" y="378" fill="#39d2c0" font-size="9">Generate</text>
+
+    <!-- Qdrant -- MITRE (dashed) -->
+    <line id="e-qdrant-mitre" x1="600" y1="475" x2="655" y2="475" stroke="#39d2c0" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#arrow-cyan)"/>
+  </g>
+
+  <!-- ── NODES ── -->
+
+  <!-- User -->
+  <g class="node" data-id="user">
+    <rect class="node-bg" x="32" y="248" width="60" height="44" rx="8" fill="rgba(88,166,255,0.12)"/>
+    <rect class="node-border" x="32" y="248" width="60" height="44" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="62" y="275" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">User</text>
+  </g>
+
+  <!-- Frontend -->
+  <g class="node" data-id="frontend">
+    <rect class="node-bg" x="118" y="244" width="100" height="52" rx="8" fill="rgba(88,166,255,0.12)"/>
+    <rect class="node-border" x="118" y="244" width="100" height="52" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="168" y="266" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">React</text>
+    <text x="168" y="280" fill="#8b949e" font-size="9" text-anchor="middle">Frontend</text>
+  </g>
+
+  <!-- Backend -->
+  <g class="node" data-id="backend">
+    <rect class="node-bg" x="272" y="244" width="120" height="52" rx="8" fill="rgba(63,185,80,0.12)"/>
+    <rect class="node-border" x="272" y="244" width="120" height="52" rx="8" fill="none" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="332" y="266" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">FastAPI</text>
+    <text x="332" y="280" fill="#8b949e" font-size="9" text-anchor="middle">SSE + JWT + OAuth2</text>
+  </g>
+
+  <!-- Agent 1 -->
+  <g class="node" data-id="agent1">
+    <rect class="node-bg" x="432" y="240" width="130" height="60" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="432" y="240" width="130" height="60" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="497" y="260" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 1</text>
+    <text x="497" y="275" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">CVE Extractor</text>
+    <text x="497" y="289" fill="#8b949e" font-size="9" text-anchor="middle">NVD + KEV + OTX</text>
+  </g>
+
+  <!-- Agent 2 -->
+  <g class="node" data-id="agent2">
+    <rect class="node-bg" x="592" y="240" width="130" height="60" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="592" y="240" width="130" height="60" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="657" y="260" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 2</text>
+    <text x="657" y="275" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">ATT&CK Classifier</text>
+    <text x="657" y="289" fill="#8b949e" font-size="9" text-anchor="middle">RAG + Hybrid Search</text>
+  </g>
+
+  <!-- Agent 3 -->
+  <g class="node" data-id="agent3">
+    <rect class="node-bg" x="752" y="240" width="140" height="60" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="752" y="240" width="140" height="60" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="822" y="260" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 3</text>
+    <text x="822" y="275" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Playbook Generator</text>
+    <text x="822" y="289" fill="#8b949e" font-size="9" text-anchor="middle">NIST 800-61 + Sigma</text>
+  </g>
+
+  <!-- NVD -->
+  <g class="node" data-id="nvd">
+    <rect class="node-bg" x="460" y="50" width="90" height="44" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="460" y="50" width="90" height="44" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="505" y="77" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">NVD API</text>
+  </g>
+
+  <!-- CISA KEV -->
+  <g class="node" data-id="kev">
+    <rect class="node-bg" x="570" y="50" width="90" height="44" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="570" y="50" width="90" height="44" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="615" y="77" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">CISA KEV</text>
+  </g>
+
+  <!-- OTX -->
+  <g class="node" data-id="otx">
+    <rect class="node-bg" x="680" y="50" width="90" height="44" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="680" y="50" width="90" height="44" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="725" y="77" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">OTX</text>
+  </g>
+
+  <!-- ThreatFox -->
+  <g class="node" data-id="threatfox">
+    <rect class="node-bg" x="790" y="50" width="90" height="44" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="790" y="50" width="90" height="44" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="835" y="77" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">ThreatFox</text>
+  </g>
+
+  <!-- Qdrant -->
+  <g class="node" data-id="qdrant">
+    <rect class="node-bg" x="510" y="445" width="90" height="55" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="510" y="445" width="90" height="55" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="555" y="470" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Qdrant</text>
+    <text x="555" y="484" fill="#8b949e" font-size="9" text-anchor="middle">Vector DB</text>
+  </g>
+
+  <!-- MITRE ATT&CK -->
+  <g class="node" data-id="mitre">
+    <rect class="node-bg" x="655" y="445" width="110" height="55" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="655" y="445" width="110" height="55" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="710" y="470" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">ATT&CK v18.1</text>
+    <text x="710" y="484" fill="#8b949e" font-size="9" text-anchor="middle">19K chunks</text>
+  </g>
+
+  <!-- Ollama LLM -->
+  <g class="node" data-id="llm">
+    <rect class="node-bg" x="785" y="445" width="100" height="55" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="785" y="445" width="100" height="55" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="835" y="470" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Ollama LLM</text>
+    <text x="835" y="484" fill="#8b949e" font-size="9" text-anchor="middle">Foundation-Sec-8B</text>
+  </g>
+
+  <!-- Animated particles container -->
+  <g id="particles"></g>
+</svg>
 </div>
 
 <div class="legend">
@@ -81,7 +280,6 @@
   <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>AI Agents</div>
   <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Threat Intel Sources</div>
   <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Vector DB / LLM</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>Data Flow</div>
 </div>
 
 <div class="info-panel" id="info">
@@ -95,220 +293,72 @@
 </footer>
 
 <script>
-const canvas = document.getElementById('arch');
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-
-canvas.width = 1100 * dpr;
-canvas.height = 620 * dpr;
-canvas.style.width = '1100px';
-canvas.style.height = '620px';
-ctx.scale(dpr, dpr);
-
-const C = {
-  bg: '#161b22', surface: '#1c2128', border: '#30363d', text: '#e6edf3', muted: '#8b949e',
-  blue: '#58a6ff', green: '#3fb950', purple: '#bc8cff', orange: '#d29922',
-  red: '#f85149', cyan: '#39d2c0', pink: '#f778ba',
-  blueDim: 'rgba(88,166,255,0.15)', greenDim: 'rgba(63,185,80,0.15)',
-  purpleDim: 'rgba(188,140,255,0.15)', orangeDim: 'rgba(210,153,34,0.15)',
-  cyanDim: 'rgba(57,210,192,0.15)',
+var nodeInfo = {
+  user: { title: 'User', color: '#58a6ff', desc: 'Security analyst or SOC operator who submits CVE IDs and reviews generated playbooks and detection rules.', tags: ['Input', 'CVE-ID'] },
+  frontend: { title: 'React Frontend', color: '#58a6ff', desc: 'Single-page app built with React 19, TypeScript, Tailwind CSS 4, and Recharts. Real-time SSE streaming, threat feed dashboard, and analysis visualization.', tags: ['React 19', 'TypeScript', 'Vite', 'Tailwind', 'SSE'] },
+  backend: { title: 'FastAPI Backend', color: '#3fb950', desc: 'REST API with SSE streaming, JWT/OAuth2 auth, rate limiting, caching, Prometheus metrics, and structured logging. Orchestrates the LangGraph pipeline.', tags: ['FastAPI', 'SSE', 'JWT', 'OAuth2', 'Prometheus'] },
+  agent1: { title: 'Agent 1: CVE Extractor', color: '#bc8cff', desc: 'Parses CVEs, enriches via NVD API (CVSS, CWEs, CPEs), checks CISA KEV for active exploitation, pulls OTX pulses and ThreatFox IOCs. Uses LLM to extract structured threat intelligence.', tags: ['NVD', 'CISA KEV', 'OTX', 'ThreatFox', 'LLM'] },
+  agent2: { title: 'Agent 2: ATT&CK Classifier', color: '#bc8cff', desc: 'Hybrid search (dense BGE-M3 + sparse with RRF) over 19K+ MITRE ATT&CK chunks. Maps vulnerability to techniques with confidence scores and tactical rationale.', tags: ['RAG', 'BGE-M3', 'Hybrid Search', 'RRF', 'MITRE ATT&CK'] },
+  agent3: { title: 'Agent 3: Playbook Generator', color: '#bc8cff', desc: 'Generates NIST SP 800-61 incident response playbooks with detection, containment, eradication, and recovery. Produces Sigma YAML detection rules for SIEM deployment.', tags: ['NIST 800-61', 'Sigma Rules', 'Playbook', 'LLM'] },
+  nvd: { title: 'NVD API 2.0', color: '#d29922', desc: 'National Vulnerability Database. CVE details, CVSS v3.1, severity, CWEs, affected CPEs. Optional API key for higher rate limits.', tags: ['CVSS', 'CWE', 'CPE', 'Free'] },
+  kev: { title: 'CISA KEV Catalog', color: '#d29922', desc: 'Known Exploited Vulnerabilities maintained by CISA. Flags CVEs with confirmed active exploitation in the wild.', tags: ['Active Exploitation', 'No Auth'] },
+  otx: { title: 'AlienVault OTX', color: '#d29922', desc: 'Open Threat Exchange. Community-driven threat intelligence pulses with IOCs, adversary info, and targeted industries.', tags: ['Pulses', 'IOCs', 'Free API Key'] },
+  threatfox: { title: 'abuse.ch ThreatFox', color: '#d29922', desc: 'Community-driven malware IOC sharing platform. File hashes, URLs, domains, IPs associated with malware families.', tags: ['Malware IOCs', 'No Auth'] },
+  qdrant: { title: 'Qdrant Vector Database', color: '#39d2c0', desc: '19,233 MITRE ATT&CK chunks with hybrid dense (1024-dim BGE-M3) + sparse vectors. Reciprocal Rank Fusion for optimal retrieval.', tags: ['19K+ chunks', 'Hybrid Search', 'BGE-M3', 'Docker'] },
+  mitre: { title: 'MITRE ATT&CK v18.1', color: '#39d2c0', desc: '691 techniques, 44 mitigations, 784 software entries, 172 groups, 17,542 relationships. Entity-level chunking with dense+sparse embeddings.', tags: ['691 Techniques', '784 Software', '172 Groups', 'STIX'] },
+  llm: { title: 'Foundation-Sec-8B via Ollama', color: '#39d2c0', desc: 'Local security-focused LLM (Q4_K_M quantization). Runs entirely on your machine — no API keys, no data leaves your network.', tags: ['8B Params', 'Q4_K_M', 'Local', 'Apple Metal'] },
 };
 
-const nodeData = [
-  { id: 'user', x: 60, y: 290, w: 90, h: 44, label: 'User', icon: '\u{1F464}', color: C.blue, fill: C.blueDim, group: 'frontend',
-    title: 'User', desc: 'Security analyst or SOC operator who submits CVE IDs for analysis and reviews generated playbooks and detection rules.', tags: ['Input', 'CVE-ID'] },
-  { id: 'frontend', x: 195, y: 290, w: 120, h: 44, label: 'React Frontend', icon: '\u269B\uFE0F', color: C.blue, fill: C.blueDim, group: 'frontend',
-    title: 'React Frontend', desc: 'Single-page application built with React 19, TypeScript, Tailwind CSS 4, and Recharts. Features real-time SSE streaming, threat feed dashboard, and analysis result visualization.', tags: ['React 19', 'TypeScript', 'Vite', 'Tailwind CSS', 'SSE'] },
-  { id: 'backend', x: 385, y: 290, w: 120, h: 44, label: 'FastAPI Backend', icon: '\u26A1', color: C.green, fill: C.greenDim, group: 'backend',
-    title: 'FastAPI Backend', desc: 'REST API with SSE streaming, JWT/OAuth2 authentication, rate limiting, caching, Prometheus metrics, and structured logging. Orchestrates the LangGraph agent pipeline.', tags: ['FastAPI', 'SSE', 'JWT', 'OAuth2', 'Prometheus'] },
-  { id: 'agent1', x: 570, y: 175, w: 150, h: 50, label: 'Agent 1\nCVE Extractor', icon: '\u{1F50D}', color: C.purple, fill: C.purpleDim, group: 'agents',
-    title: 'Agent 1: CVE Extractor', desc: 'Parses CVE IDs, enriches via NVD API (CVSS scores, CWEs, affected products), checks CISA KEV for active exploitation, pulls OTX pulses and ThreatFox IOCs. Uses LLM to extract structured threat intelligence.', tags: ['NVD', 'CISA KEV', 'OTX', 'ThreatFox', 'LLM'] },
-  { id: 'agent2', x: 570, y: 290, w: 150, h: 50, label: 'Agent 2\nATT&CK Classifier', icon: '\u{1F3AF}', color: C.purple, fill: C.purpleDim, group: 'agents',
-    title: 'Agent 2: ATT&CK Classifier', desc: 'Performs hybrid search (dense BGE-M3 + sparse vectors with RRF) over 19K+ MITRE ATT&CK chunks. Maps vulnerability to techniques with confidence scores and tactical rationale.', tags: ['RAG', 'BGE-M3', 'Hybrid Search', 'RRF', 'MITRE ATT&CK'] },
-  { id: 'agent3', x: 570, y: 405, w: 150, h: 50, label: 'Agent 3\nPlaybook Generator', icon: '\u{1F4CB}', color: C.purple, fill: C.purpleDim, group: 'agents',
-    title: 'Agent 3: Playbook Generator', desc: 'Generates NIST SP 800-61 compliant incident response playbooks with detection, containment, eradication, and recovery steps. Also produces Sigma YAML detection rules ready for SIEM deployment.', tags: ['NIST 800-61', 'Sigma Rules', 'Playbook', 'LLM'] },
-  { id: 'nvd', x: 810, y: 80, w: 90, h: 38, label: 'NVD API', icon: '\u{1F3DB}\uFE0F', color: C.orange, fill: C.orangeDim, group: 'intel',
-    title: 'NVD API 2.0', desc: 'National Vulnerability Database. Provides CVE details, CVSS v3.1 scores, severity, CWEs, and affected product CPEs. Optional API key increases rate from 5 to 50 requests/30s.', tags: ['CVSS', 'CWE', 'CPE', 'Free'] },
-  { id: 'kev', x: 920, y: 80, w: 90, h: 38, label: 'CISA KEV', icon: '\u26A0\uFE0F', color: C.orange, fill: C.orangeDim, group: 'intel',
-    title: 'CISA KEV Catalog', desc: 'Known Exploited Vulnerabilities catalog maintained by CISA. Flags CVEs with confirmed active exploitation in the wild. No authentication required.', tags: ['Active Exploitation', 'No Auth'] },
-  { id: 'otx', x: 810, y: 140, w: 90, h: 38, label: 'OTX', icon: '\u{1F310}', color: C.orange, fill: C.orangeDim, group: 'intel',
-    title: 'AlienVault OTX', desc: 'Open Threat Exchange. Provides community-driven threat intelligence pulses with IOCs, adversary info, and targeted industry data. Free API key required.', tags: ['Pulses', 'IOCs', 'Free API Key'] },
-  { id: 'threatfox', x: 920, y: 140, w: 90, h: 38, label: 'ThreatFox', icon: '\u{1F98A}', color: C.orange, fill: C.orangeDim, group: 'intel',
-    title: 'abuse.ch ThreatFox', desc: 'Community-driven malware IOC sharing platform by abuse.ch. Provides file hashes, URLs, domains, and IP addresses associated with malware families. No auth needed.', tags: ['Malware IOCs', 'No Auth'] },
-  { id: 'qdrant', x: 810, y: 280, w: 100, h: 44, label: 'Qdrant', icon: '\u{1F52E}', color: C.cyan, fill: C.cyanDim, group: 'infra',
-    title: 'Qdrant Vector Database', desc: 'Stores 19,233 MITRE ATT&CK chunks with hybrid dense (1024-dim BGE-M3) + sparse vectors. Supports hybrid search with Reciprocal Rank Fusion for optimal retrieval.', tags: ['19K+ chunks', 'Hybrid Search', 'BGE-M3', 'Docker'] },
-  { id: 'mitre', x: 950, y: 280, w: 100, h: 44, label: 'ATT&CK v18.1', icon: '\u{1F6E1}\uFE0F', color: C.cyan, fill: C.cyanDim, group: 'infra',
-    title: 'MITRE ATT&CK v18.1', desc: '691 techniques, 44 mitigations, 784 software entries, 172 groups, 17,542 relationships. All chunked and embedded into Qdrant with entity-level granularity.', tags: ['691 Techniques', '784 Software', '172 Groups', 'STIX'] },
-  { id: 'llm', x: 870, y: 405, w: 140, h: 44, label: 'Ollama LLM', icon: '\u{1F9E0}', color: C.cyan, fill: C.cyanDim, group: 'infra',
-    title: 'Ollama - Foundation-Sec-8B', desc: 'Local security-focused LLM (Foundation-Sec-8B-Reasoning, Q4_K_M quantization). Runs entirely on your machine via Ollama. No API keys, no data leaves your network.', tags: ['8B Parameters', 'Q4_K_M', 'Local', 'Apple Metal'] },
+var phases = [
+  { edges: ['e-user-frontend'], glow: 'user', dur: 600 },
+  { edges: ['e-frontend-backend'], glow: 'frontend', dur: 600 },
+  { edges: ['e-backend-agent1'], glow: 'backend', dur: 600 },
+  { edges: ['e-a1-nvd', 'e-a1-kev', 'e-a1-otx', 'e-a1-tf'], glow: 'agent1', dur: 1000 },
+  { edges: ['e-a1-a2'], glow: 'agent1', dur: 600 },
+  { edges: ['e-a2-qdrant', 'e-a2-llm'], glow: 'agent2', dur: 1000 },
+  { edges: ['e-qdrant-mitre'], glow: 'qdrant', dur: 500 },
+  { edges: ['e-a2-a3'], glow: 'agent2', dur: 600 },
+  { edges: ['e-a3-llm'], glow: 'agent3', dur: 800 },
 ];
 
-const edges = [
-  { from: 'user', to: 'frontend', label: '', color: C.muted },
-  { from: 'frontend', to: 'backend', label: 'SSE Stream', color: C.blue },
-  { from: 'backend', to: 'agent1', label: '', color: C.green },
-  { from: 'agent1', to: 'agent2', label: '', color: C.purple },
-  { from: 'agent2', to: 'agent3', label: '', color: C.purple },
-  { from: 'agent1', to: 'nvd', label: 'Enrich', color: C.orange },
-  { from: 'agent1', to: 'kev', label: '', color: C.orange },
-  { from: 'agent1', to: 'otx', label: '', color: C.orange },
-  { from: 'agent1', to: 'threatfox', label: '', color: C.orange },
-  { from: 'agent2', to: 'qdrant', label: 'Hybrid Search', color: C.cyan },
-  { from: 'qdrant', to: 'mitre', label: '', color: C.cyan, dashed: true },
-  { from: 'agent2', to: 'llm', label: 'Classify', color: C.cyan },
-  { from: 'agent3', to: 'llm', label: 'Generate', color: C.cyan },
-];
+var selectedNode = null;
+var animating = false;
+var animPhase = -1;
+var animTimer = null;
 
-function getNode(id) { return nodeData.find(function(n) { return n.id === id; }); }
-function nodeCenter(n) { return { x: n.x + n.w / 2, y: n.y + n.h / 2 }; }
-
-function roundRect(x, y, w, h, r, fillColor, strokeColor, lw) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-  if (fillColor) { ctx.fillStyle = fillColor; ctx.fill(); }
-  if (strokeColor) { ctx.strokeStyle = strokeColor; ctx.lineWidth = lw || 1.5; ctx.stroke(); }
-}
-
-function edgePoints(e) {
-  var a = getNode(e.from), b = getNode(e.to);
-  var ca = nodeCenter(a), cb = nodeCenter(b);
-  var angle = Math.atan2(cb.y - ca.y, cb.x - ca.x);
-  var x1, y1, x2, y2;
-  if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
-    x1 = ca.x + (Math.cos(angle) > 0 ? a.w / 2 : -a.w / 2); y1 = ca.y;
-    x2 = cb.x + (Math.cos(angle) > 0 ? -b.w / 2 : b.w / 2); y2 = cb.y;
-  } else {
-    x1 = ca.x; y1 = ca.y + (Math.sin(angle) > 0 ? a.h / 2 : -a.h / 2);
-    x2 = cb.x; y2 = cb.y + (Math.sin(angle) > 0 ? -b.h / 2 : b.h / 2);
-  }
-  return { x1: x1, y1: y1, x2: x2, y2: y2 };
-}
-
-function drawArrow(x1, y1, x2, y2, color, dashed, label, progress) {
-  ctx.save();
-  ctx.strokeStyle = color; ctx.lineWidth = 1.8;
-  if (dashed) ctx.setLineDash([6, 4]);
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-  ctx.setLineDash([]);
-  var angle = Math.atan2(y2 - y1, x2 - x1);
-  var aLen = 8;
-  ctx.beginPath(); ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - aLen * Math.cos(angle - 0.4), y2 - aLen * Math.sin(angle - 0.4));
-  ctx.lineTo(x2 - aLen * Math.cos(angle + 0.4), y2 - aLen * Math.sin(angle + 0.4));
-  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
-  if (label) {
-    var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-    ctx.font = '11px -apple-system, sans-serif';
-    ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.fillText(label, mx, my - 5);
-  }
-  if (progress !== undefined && progress >= 0 && progress <= 1) {
-    var dx = x1 + (x2 - x1) * progress, dy = y1 + (y2 - y1) * progress;
-    ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff'; ctx.fill();
-    ctx.beginPath(); ctx.arc(dx, dy, 7, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fill();
-  }
-  ctx.restore();
-}
-
-var edgeOrder = ['user-frontend', 'frontend-backend', 'backend-agent1',
-  'agent1-nvd', 'agent1-kev', 'agent1-otx', 'agent1-threatfox',
-  'agent1-agent2', 'agent2-qdrant', 'qdrant-mitre', 'agent2-llm',
-  'agent2-agent3', 'agent3-llm'];
-
-function getEdgePhase(e) { return edgeOrder.indexOf(e.from + '-' + e.to); }
-
-var hoveredNode = null, selectedNode = null, animPhase = -1, animTime = 0;
-
-function draw() {
-  ctx.clearRect(0, 0, 1100, 620);
-  ctx.font = 'bold 11px -apple-system, sans-serif';
-  ctx.fillStyle = C.muted; ctx.textAlign = 'left';
-  ctx.fillText('CLIENT', 65, 265);
-  ctx.fillText('API GATEWAY', 390, 265);
-  ctx.fillText('AGENT PIPELINE', 590, 155);
-  ctx.fillText('THREAT INTELLIGENCE', 835, 65);
-  ctx.fillText('INFRASTRUCTURE', 870, 265);
-
-  edges.forEach(function(e) {
-    var pts = edgePoints(e);
-    var progress;
-    if (animPhase >= 0) {
-      var ep = getEdgePhase(e);
-      if (ep === animPhase) progress = animTime;
-    }
-    drawArrow(pts.x1, pts.y1, pts.x2, pts.y2, e.color, e.dashed, e.label, progress);
+document.querySelectorAll('.node').forEach(function(el) {
+  el.addEventListener('click', function() {
+    var id = el.getAttribute('data-id');
+    selectNode(id);
   });
-
-  nodeData.forEach(function(n) {
-    var isHovered = hoveredNode === n.id;
-    var isSelected = selectedNode === n.id;
-    if (isHovered || isSelected) { ctx.shadowColor = n.color; ctx.shadowBlur = 16; }
-    roundRect(n.x, n.y, n.w, n.h, 8, n.fill, n.color, isSelected ? 2.5 : 1.5);
-    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-    var lines = n.label.split('\n');
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    var cx = n.x + n.w / 2, cy = n.y + n.h / 2;
-    if (lines.length === 1) {
-      ctx.font = '13px -apple-system, sans-serif'; ctx.fillStyle = n.color;
-      ctx.fillText(n.icon + ' ' + lines[0], cx, cy);
-    } else {
-      ctx.font = 'bold 12px -apple-system, sans-serif'; ctx.fillStyle = n.color;
-      ctx.fillText(n.icon + ' ' + lines[0], cx, cy - 8);
-      ctx.font = '11px -apple-system, sans-serif'; ctx.fillStyle = C.text;
-      ctx.fillText(lines[1], cx, cy + 8);
-    }
-  });
-}
-
-var PHASE_DURATION = 600, TOTAL_PHASES = 13, lastTime = 0;
-function animate(ts) {
-  if (animPhase >= 0) {
-    var elapsed = ts - lastTime;
-    animTime += elapsed / PHASE_DURATION;
-    if (animTime > 1) { animTime = 0; animPhase++; if (animPhase >= TOTAL_PHASES) animPhase = 0; }
-  }
-  lastTime = ts; draw(); requestAnimationFrame(animate);
-}
-requestAnimationFrame(animate);
-
-canvas.addEventListener('mousemove', function(e) {
-  var rect = canvas.getBoundingClientRect();
-  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  hoveredNode = null;
-  for (var i = 0; i < nodeData.length; i++) {
-    var n = nodeData[i];
-    if (mx >= n.x && mx <= n.x + n.w && my >= n.y && my <= n.y + n.h) {
-      hoveredNode = n.id; canvas.style.cursor = 'pointer'; break;
-    }
-  }
-  if (!hoveredNode) canvas.style.cursor = 'default';
 });
 
-canvas.addEventListener('click', function(e) {
-  var rect = canvas.getBoundingClientRect();
-  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+function selectNode(id) {
+  document.querySelectorAll('.node').forEach(function(n) { n.classList.remove('selected'); });
+  var el = document.querySelector('.node[data-id="' + id + '"]');
+  if (el) el.classList.add('selected');
+  selectedNode = id;
+  showInfo(id);
+}
+
+function clearSelection() {
+  document.querySelectorAll('.node').forEach(function(n) { n.classList.remove('selected'); });
   selectedNode = null;
-  for (var i = 0; i < nodeData.length; i++) {
-    var n = nodeData[i];
-    if (mx >= n.x && mx <= n.x + n.w && my >= n.y && my <= n.y + n.h) {
-      selectedNode = n.id; showInfo(n); break;
-    }
-  }
-  if (!selectedNode) hideInfo();
-});
+  hideInfo();
+  clearGlows();
+}
 
-function showInfo(n) {
+function showInfo(id) {
+  var n = nodeInfo[id];
+  if (!n) return;
   var panel = document.getElementById('info');
-  var titleEl = document.getElementById('info-title');
-  var descEl = document.getElementById('info-desc');
-  var tagsEl = document.getElementById('info-tags');
-  titleEl.textContent = n.title;
-  titleEl.style.color = n.color;
-  descEl.textContent = n.desc;
-  // Build tags safely using DOM methods
-  while (tagsEl.firstChild) tagsEl.removeChild(tagsEl.firstChild);
+  var title = document.getElementById('info-title');
+  var desc = document.getElementById('info-desc');
+  var tags = document.getElementById('info-tags');
+  title.textContent = n.title;
+  title.style.color = n.color;
+  desc.textContent = n.desc;
+  while (tags.firstChild) tags.removeChild(tags.firstChild);
   n.tags.forEach(function(t) {
     var span = document.createElement('span');
     span.className = 'tag';
@@ -316,12 +366,87 @@ function showInfo(n) {
     span.style.background = n.color + '22';
     span.style.color = n.color;
     span.style.border = '1px solid ' + n.color + '44';
-    tagsEl.appendChild(span);
+    tags.appendChild(span);
   });
   panel.classList.add('visible');
 }
 
 function hideInfo() { document.getElementById('info').classList.remove('visible'); }
+
+function applyGlow(nodeId) {
+  clearGlows();
+  var el = document.querySelector('.node[data-id="' + nodeId + '"] .node-border');
+  if (!el) return;
+  var n = nodeInfo[nodeId];
+  if (!n) return;
+  var color = n.color;
+  var filterName = '';
+  if (color === '#58a6ff') filterName = 'glow-blue';
+  else if (color === '#3fb950') filterName = 'glow-green';
+  else if (color === '#bc8cff') filterName = 'glow-purple';
+  else if (color === '#d29922') filterName = 'glow-orange';
+  else if (color === '#39d2c0') filterName = 'glow-cyan';
+  if (filterName) el.setAttribute('filter', 'url(#' + filterName + ')');
+  el.setAttribute('stroke-width', '3');
+}
+
+function clearGlows() {
+  document.querySelectorAll('.node-border').forEach(function(el) {
+    el.removeAttribute('filter');
+    el.setAttribute('stroke-width', '1.5');
+  });
+}
+
+function spawnParticle(edgeId, color, duration) {
+  var edge = document.getElementById(edgeId);
+  if (!edge) return;
+  var container = document.getElementById('particles');
+  var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r', '4');
+  circle.setAttribute('fill', color || '#fff');
+  circle.classList.add('particle');
+  var pathData;
+  if (edge.tagName === 'line') {
+    var x1 = edge.getAttribute('x1'), y1 = edge.getAttribute('y1');
+    var x2 = edge.getAttribute('x2'), y2 = edge.getAttribute('y2');
+    pathData = 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2;
+  } else {
+    pathData = edge.getAttribute('d');
+  }
+  circle.style.offsetPath = "path('" + pathData + "')";
+  circle.style.animationDuration = (duration || 800) + 'ms';
+  container.appendChild(circle);
+  setTimeout(function() { if (circle.parentNode) circle.parentNode.removeChild(circle); }, duration || 800);
+}
+
+function startAnimation() {
+  stopAnimation();
+  animating = true;
+  animPhase = 0;
+  runPhase();
+}
+
+function runPhase() {
+  if (!animating || animPhase >= phases.length) {
+    if (animating) { animPhase = 0; runPhase(); }
+    return;
+  }
+  var phase = phases[animPhase];
+  applyGlow(phase.glow);
+  var n = nodeInfo[phase.glow];
+  var color = n ? n.color : '#fff';
+  phase.edges.forEach(function(eid) { spawnParticle(eid, color, phase.dur); });
+  animTimer = setTimeout(function() { animPhase++; runPhase(); }, phase.dur + 100);
+}
+
+function stopAnimation() {
+  animating = false;
+  if (animTimer) clearTimeout(animTimer);
+  animTimer = null;
+  clearGlows();
+  var container = document.getElementById('particles');
+  while (container.firstChild) container.removeChild(container.firstChild);
+}
 
 function setActive(id) {
   document.querySelectorAll('.controls button').forEach(function(b) { b.classList.remove('active'); });
@@ -329,19 +454,26 @@ function setActive(id) {
 }
 
 document.getElementById('btn-reset').addEventListener('click', function() {
-  animPhase = -1; selectedNode = null; hideInfo(); setActive('btn-reset');
+  stopAnimation(); clearSelection(); setActive('btn-reset');
 });
 document.getElementById('btn-animate').addEventListener('click', function() {
-  animPhase = 0; animTime = 0; selectedNode = null; hideInfo(); setActive('btn-animate');
+  clearSelection(); startAnimation(); setActive('btn-animate');
 });
 document.getElementById('btn-agent1').addEventListener('click', function() {
-  animPhase = -1; selectedNode = 'agent1'; showInfo(getNode('agent1')); setActive('btn-agent1');
+  stopAnimation(); selectNode('agent1'); applyGlow('agent1'); setActive('btn-agent1');
+  ['e-a1-nvd', 'e-a1-kev', 'e-a1-otx', 'e-a1-tf'].forEach(function(eid) { spawnParticle(eid, '#d29922', 1200); });
 });
 document.getElementById('btn-agent2').addEventListener('click', function() {
-  animPhase = -1; selectedNode = 'agent2'; showInfo(getNode('agent2')); setActive('btn-agent2');
+  stopAnimation(); selectNode('agent2'); applyGlow('agent2'); setActive('btn-agent2');
+  ['e-a2-qdrant', 'e-a2-llm'].forEach(function(eid) { spawnParticle(eid, '#39d2c0', 1200); });
 });
 document.getElementById('btn-agent3').addEventListener('click', function() {
-  animPhase = -1; selectedNode = 'agent3'; showInfo(getNode('agent3')); setActive('btn-agent3');
+  stopAnimation(); selectNode('agent3'); applyGlow('agent3'); setActive('btn-agent3');
+  spawnParticle('e-a3-llm', '#39d2c0', 1200);
+});
+
+document.getElementById('diagram').addEventListener('click', function(e) {
+  if (!e.target.closest('.node')) { clearSelection(); setActive('btn-reset'); }
 });
 </script>
 </body>
