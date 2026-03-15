@@ -123,6 +123,8 @@ Open **http://localhost:5173** in your browser. Enter a CVE ID (e.g., `CVE-2021-
 
 Copy `.env.example` to `.env` and customize:
 
+**Core**
+
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL |
@@ -131,30 +133,43 @@ Copy `.env.example` to `.env` and customize:
 | `QDRANT_HOST` | `localhost` | Qdrant host |
 | `QDRANT_PORT` | `6333` | Qdrant port |
 | `QDRANT_COLLECTION` | `mitre_attack` | Qdrant collection name |
-| `NVD_API_KEY` | *(empty)* | Optional NVD API key for higher rate limits |
-| `OTX_API_KEY` | *(empty)* | AlienVault OTX API key (free, enables OTX feed) |
-| `GROQ_API_KEY` | *(empty)* | Groq API key (if using Groq provider) |
-| `JWT_SECRET` | *(empty)* | Secret for JWT tokens (enables auth when set) |
+
+**API Keys** *(all optional)*
+
+| Variable | Description |
+|----------|-------------|
+| `NVD_API_KEY` | NVD API key for higher rate limits |
+| `OTX_API_KEY` | AlienVault OTX API key (free, enables OTX feed) |
+| `GROQ_API_KEY` | Groq API key (if using Groq provider) |
+
+**Auth & Security** *(optional — without `JWT_SECRET`, API runs in open-access mode)*
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `JWT_SECRET` | — | Secret for JWT tokens (enables auth when set) |
 | `JWT_ALGORITHM` | `HS256` | JWT signing algorithm |
-| `GOOGLE_CLIENT_ID` | *(empty)* | Google OAuth2 client ID |
-| `GOOGLE_CLIENT_SECRET` | *(empty)* | Google OAuth2 client secret |
-| `GITHUB_CLIENT_ID` | *(empty)* | GitHub OAuth2 client ID |
-| `GITHUB_CLIENT_SECRET` | *(empty)* | GitHub OAuth2 client secret |
-| `WEBHOOK_URL` | *(empty)* | Webhook URL for analysis notifications |
-| `WEBHOOK_SEVERITY_THRESHOLD` | `HIGH` | Minimum severity to trigger webhooks |
+| `GOOGLE_CLIENT_ID` / `_SECRET` | — | Google OAuth2 credentials |
+| `GITHUB_CLIENT_ID` / `_SECRET` | — | GitHub OAuth2 credentials |
 | `COOKIE_SECURE` | `false` | Set `true` in production behind HTTPS |
+
+**Notifications** *(optional)*
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEBHOOK_URL` | — | Webhook URL for analysis notifications |
+| `WEBHOOK_SEVERITY_THRESHOLD` | `HIGH` | Minimum severity to trigger webhooks |
 
 ## Data Sources
 
-All data sources are free and publicly available:
+All data sources are **free** and publicly available:
 
-| Source | Description | Auth |
-|--------|-------------|------|
-| [NVD API 2.0](https://services.nvd.nist.gov) | CVE details, CVSS scores, CWEs | Optional API key |
-| [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) | Known exploited vulnerabilities | None |
-| [MITRE ATT&CK](https://attack.mitre.org/) | Adversary tactics & techniques (STIX v18.1) | None |
-| [AlienVault OTX](https://otx.alienvault.com/) | Threat pulses & IOCs | Free API key |
-| [abuse.ch ThreatFox](https://threatfox.abuse.ch/) | Malware IOCs | None |
+| Source | What It Provides | Auth Required |
+|--------|-----------------|---------------|
+| [NVD API 2.0](https://services.nvd.nist.gov) | CVE details, CVSS scores, CWEs, references | Optional API key (higher rate limits) |
+| [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) | Known exploited vulnerabilities with remediation deadlines | None |
+| [MITRE ATT&CK](https://attack.mitre.org/) | 19K+ adversary tactics, techniques & mitigations (STIX v18.1) | None |
+| [AlienVault OTX](https://otx.alienvault.com/) | Community threat pulses, IOCs, malware samples | Free API key |
+| [abuse.ch ThreatFox](https://threatfox.abuse.ch/) | Malware IOCs (IPs, domains, URLs, hashes) | None |
 
 ## API Reference
 
