@@ -6,7 +6,7 @@ Built with LangGraph for agent orchestration, Qdrant for vector search, and a lo
 
 ## Architecture
 
-> **Interactive version:** Open [`docs/architecture.html`](https://ayansk11.github.io/Agentic_Cybersec_Threat_Analyst/docs/architecture.html) for an animated, clickable diagram with detailed node descriptions and live data-flow particles.
+> **Interactive version:** Open [`docs/architecture.html`](https://ayansk11.github.io/Agentic-Cybersec-Threat-Analyst/docs/architecture.html) for an animated, clickable diagram with detailed node descriptions and live data-flow particles.
 
 ```mermaid
 flowchart LR
@@ -69,8 +69,8 @@ flowchart LR
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/ayansk11/Agentic_Cybersec_Threat_Analyst.git
-cd Agentic_Cybersec_Threat_Analyst
+git clone https://github.com/ayansk11/Agentic-Cybersec-Threat-Analyst.git
+cd Agentic-Cybersec-Threat-Analyst
 
 # Backend
 pip install -e "backend/.[dev]"
@@ -239,7 +239,7 @@ The frontend is served via nginx on port 80, proxying API requests to the backen
 ## Project Structure
 
 ```
-Agentic_Cybersec_Threat_Analyst/
+Agentic-Cybersec-Threat-Analyst/
 ├── backend/
 │   ├── main.py                    # FastAPI entry point
 │   ├── config.py                  # Settings (Pydantic BaseSettings)

@@ -69,7 +69,7 @@
 </div>
 
 <div class="diagram-wrap">
-<svg id="diagram" viewBox="0 0 1440 760" width="1440" height="760" xmlns="http://www.w3.org/2000/svg">
+<svg id="diagram" viewBox="0 0 1500 800" width="1500" height="800" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <marker id="arrow-muted" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
       <path d="M0,0 L10,4 L0,8 Z" fill="#8b949e"/>
@@ -97,170 +97,170 @@
   </defs>
 
   <!-- ── Subgraph backgrounds ── -->
-  <rect x="30" y="290" width="260" height="120" rx="12" fill="none" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
-  <text x="42" y="308" fill="#58a6ff" font-size="10" font-weight="600" opacity="0.5">CLIENT</text>
+  <rect x="25" y="330" width="285" height="130" rx="12" fill="none" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="37" y="348" fill="#58a6ff" font-size="10" font-weight="600" opacity="0.5">CLIENT</text>
 
-  <rect x="310" y="290" width="155" height="120" rx="12" fill="none" stroke="#3fb950" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
-  <text x="322" y="308" fill="#3fb950" font-size="10" font-weight="600" opacity="0.5">API GATEWAY</text>
+  <rect x="320" y="330" width="165" height="130" rx="12" fill="none" stroke="#3fb950" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="332" y="348" fill="#3fb950" font-size="10" font-weight="600" opacity="0.5">API GATEWAY</text>
 
-  <rect x="485" y="260" width="690" height="170" rx="12" fill="none" stroke="#bc8cff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
-  <text x="497" y="278" fill="#bc8cff" font-size="10" font-weight="600" opacity="0.5">AGENT PIPELINE</text>
+  <rect x="500" y="310" width="680" height="160" rx="12" fill="none" stroke="#bc8cff" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="512" y="328" fill="#bc8cff" font-size="10" font-weight="600" opacity="0.5">AGENT PIPELINE</text>
 
-  <rect x="485" y="30" width="690" height="120" rx="12" fill="none" stroke="#d29922" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
-  <text x="497" y="48" fill="#d29922" font-size="10" font-weight="600" opacity="0.5">THREAT INTELLIGENCE</text>
+  <rect x="490" y="40" width="700" height="130" rx="12" fill="none" stroke="#d29922" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="502" y="58" fill="#d29922" font-size="10" font-weight="600" opacity="0.5">THREAT INTELLIGENCE</text>
 
-  <rect x="540" y="530" width="610" height="140" rx="12" fill="none" stroke="#39d2c0" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
-  <text x="552" y="548" fill="#39d2c0" font-size="10" font-weight="600" opacity="0.5">INFRASTRUCTURE</text>
+  <rect x="540" y="570" width="620" height="140" rx="12" fill="none" stroke="#39d2c0" stroke-width="1" stroke-dasharray="4 3" opacity="0.3"/>
+  <text x="552" y="588" fill="#39d2c0" font-size="10" font-weight="600" opacity="0.5">INFRASTRUCTURE</text>
 
   <!-- ── EDGES ── -->
   <g id="edges">
     <!-- User -> Frontend -->
-    <line id="e-user-frontend" x1="120" y1="345" x2="155" y2="345" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow-muted)"/>
+    <line id="e-user-frontend" x1="130" y1="400" x2="160" y2="400" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow-muted)"/>
 
     <!-- Frontend -> Backend -->
-    <line id="e-frontend-backend" x1="270" y1="345" x2="325" y2="345" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
-    <text x="297" y="335" fill="#58a6ff" font-size="9" text-anchor="middle">SSE Stream</text>
+    <line id="e-frontend-backend" x1="295" y1="400" x2="335" y2="400" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <text x="315" y="390" fill="#58a6ff" font-size="9" text-anchor="middle">SSE Stream</text>
 
     <!-- Backend -> Agent1 -->
-    <line id="e-backend-agent1" x1="450" y1="345" x2="505" y2="345" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <line id="e-backend-agent1" x1="475" y1="400" x2="515" y2="400" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
 
     <!-- Agent1 -> Agent2 -->
-    <line id="e-a1-a2" x1="665" y1="340" x2="720" y2="340" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+    <line id="e-a1-a2" x1="695" y1="395" x2="735" y2="395" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
 
     <!-- Agent2 -> Agent3 -->
-    <line id="e-a2-a3" x1="880" y1="340" x2="940" y2="340" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+    <line id="e-a2-a3" x1="915" y1="395" x2="955" y2="395" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
 
-    <!-- Agent1 -> NVD (nearly vertical) -->
-    <path id="e-a1-nvd" d="M545,295 Q545,200 557,115" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+    <!-- Agent1 -> NVD -->
+    <path id="e-a1-nvd" d="M565,345 Q565,240 570,130" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
     <!-- Agent1 -> KEV -->
-    <path id="e-a1-kev" d="M565,295 Q640,195 717,115" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+    <path id="e-a1-kev" d="M585,345 Q660,230 735,130" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
     <!-- Agent1 -> OTX -->
-    <path id="e-a1-otx" d="M590,295 Q730,195 877,115" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+    <path id="e-a1-otx" d="M610,345 Q750,230 900,130" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
     <!-- Agent1 -> ThreatFox -->
-    <path id="e-a1-tf" d="M620,295 Q825,195 1037,115" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
+    <path id="e-a1-tf" d="M635,345 Q850,230 1065,130" fill="none" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
     <!-- Agent2 -> Qdrant -->
-    <path id="e-a2-qdrant" d="M760,395 Q710,465 640,555" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
-    <text x="670" y="465" fill="#39d2c0" font-size="9" text-anchor="end">Hybrid Search</text>
+    <path id="e-a2-qdrant" d="M790,440 Q730,505 640,600" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="690" y="505" fill="#39d2c0" font-size="9" text-anchor="end">Hybrid Search</text>
 
     <!-- Agent2 -> LLM -->
-    <path id="e-a2-llm" d="M830,395 Q900,470 1000,555" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
-    <text x="940" y="460" fill="#39d2c0" font-size="9">Classify</text>
+    <path id="e-a2-llm" d="M860,440 Q940,510 1042,600" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="965" y="505" fill="#39d2c0" font-size="9">Classify</text>
 
     <!-- Agent3 -> LLM -->
-    <path id="e-a3-llm" d="M1030,395 Q1035,475 1035,555" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
-    <text x="1060" y="475" fill="#39d2c0" font-size="9">Generate</text>
+    <path id="e-a3-llm" d="M1055,440 Q1055,520 1050,600" fill="none" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
+    <text x="1080" y="520" fill="#39d2c0" font-size="9">Generate</text>
 
     <!-- Qdrant -- MITRE (dashed) -->
-    <line id="e-qdrant-mitre" x1="680" y1="590" x2="755" y2="590" stroke="#39d2c0" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#arrow-cyan)"/>
-    <text x="717" y="572" fill="#39d2c0" font-size="8" text-anchor="middle">Dense + Sparse</text>
+    <line id="e-qdrant-mitre" x1="700" y1="640" x2="745" y2="640" stroke="#39d2c0" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#arrow-cyan)"/>
+    <text x="722" y="625" fill="#39d2c0" font-size="8" text-anchor="middle">Dense + Sparse</text>
   </g>
 
   <!-- ── NODES ── -->
 
   <!-- User -->
   <g class="node" data-id="user">
-    <rect class="node-bg" x="50" y="321" width="70" height="48" rx="8" fill="rgba(88,166,255,0.12)"/>
-    <rect class="node-border" x="50" y="321" width="70" height="48" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
-    <text x="85" y="350" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">User</text>
+    <rect class="node-bg" x="45" y="373" width="85" height="54" rx="8" fill="rgba(88,166,255,0.12)"/>
+    <rect class="node-border" x="45" y="373" width="85" height="54" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="87" y="405" fill="#e6edf3" font-size="13" text-anchor="middle" font-weight="500">User</text>
   </g>
 
   <!-- Frontend -->
   <g class="node" data-id="frontend">
-    <rect class="node-bg" x="155" y="317" width="115" height="56" rx="8" fill="rgba(88,166,255,0.12)"/>
-    <rect class="node-border" x="155" y="317" width="115" height="56" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
-    <text x="212" y="341" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">React</text>
-    <text x="212" y="355" fill="#8b949e" font-size="9" text-anchor="middle">Frontend</text>
+    <rect class="node-bg" x="160" y="370" width="135" height="60" rx="8" fill="rgba(88,166,255,0.12)"/>
+    <rect class="node-border" x="160" y="370" width="135" height="60" rx="8" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="227" y="396" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">React</text>
+    <text x="227" y="412" fill="#8b949e" font-size="10" text-anchor="middle">Frontend</text>
   </g>
 
   <!-- Backend -->
   <g class="node" data-id="backend">
-    <rect class="node-bg" x="325" y="317" width="125" height="56" rx="8" fill="rgba(63,185,80,0.12)"/>
-    <rect class="node-border" x="325" y="317" width="125" height="56" rx="8" fill="none" stroke="#3fb950" stroke-width="1.5"/>
-    <text x="387" y="341" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">FastAPI</text>
-    <text x="387" y="355" fill="#8b949e" font-size="9" text-anchor="middle">SSE + JWT + OAuth2</text>
+    <rect class="node-bg" x="335" y="370" width="140" height="60" rx="8" fill="rgba(63,185,80,0.12)"/>
+    <rect class="node-border" x="335" y="370" width="140" height="60" rx="8" fill="none" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="405" y="396" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">FastAPI</text>
+    <text x="405" y="412" fill="#8b949e" font-size="10" text-anchor="middle">SSE + JWT + OAuth2</text>
   </g>
 
   <!-- Agent 1 -->
   <g class="node" data-id="agent1">
-    <rect class="node-bg" x="505" y="295" width="160" height="80" rx="8" fill="rgba(188,140,255,0.12)"/>
-    <rect class="node-border" x="505" y="295" width="160" height="80" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
-    <text x="585" y="320" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 1</text>
-    <text x="585" y="337" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">CVE Extractor</text>
-    <text x="585" y="353" fill="#8b949e" font-size="9" text-anchor="middle">NVD + KEV + OTX</text>
+    <rect class="node-bg" x="515" y="345" width="180" height="95" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="515" y="345" width="180" height="95" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="605" y="373" fill="#bc8cff" font-size="11" text-anchor="middle" font-weight="700">AGENT 1</text>
+    <text x="605" y="393" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">CVE Extractor</text>
+    <text x="605" y="411" fill="#8b949e" font-size="10" text-anchor="middle">NVD + KEV + OTX</text>
   </g>
 
   <!-- Agent 2 -->
   <g class="node" data-id="agent2">
-    <rect class="node-bg" x="720" y="295" width="160" height="80" rx="8" fill="rgba(188,140,255,0.12)"/>
-    <rect class="node-border" x="720" y="295" width="160" height="80" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
-    <text x="800" y="320" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 2</text>
-    <text x="800" y="337" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">ATT&CK Classifier</text>
-    <text x="800" y="353" fill="#8b949e" font-size="9" text-anchor="middle">RAG + Hybrid Search</text>
+    <rect class="node-bg" x="735" y="345" width="180" height="95" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="735" y="345" width="180" height="95" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="825" y="373" fill="#bc8cff" font-size="11" text-anchor="middle" font-weight="700">AGENT 2</text>
+    <text x="825" y="393" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">ATT&CK Classifier</text>
+    <text x="825" y="411" fill="#8b949e" font-size="10" text-anchor="middle">RAG + Hybrid Search</text>
   </g>
 
   <!-- Agent 3 -->
   <g class="node" data-id="agent3">
-    <rect class="node-bg" x="940" y="295" width="180" height="80" rx="8" fill="rgba(188,140,255,0.12)"/>
-    <rect class="node-border" x="940" y="295" width="180" height="80" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
-    <text x="1030" y="320" fill="#bc8cff" font-size="10" text-anchor="middle" font-weight="700">AGENT 3</text>
-    <text x="1030" y="337" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Playbook Generator</text>
-    <text x="1030" y="353" fill="#8b949e" font-size="9" text-anchor="middle">NIST 800-61 + Sigma</text>
+    <rect class="node-bg" x="955" y="345" width="200" height="95" rx="8" fill="rgba(188,140,255,0.12)"/>
+    <rect class="node-border" x="955" y="345" width="200" height="95" rx="8" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+    <text x="1055" y="373" fill="#bc8cff" font-size="11" text-anchor="middle" font-weight="700">AGENT 3</text>
+    <text x="1055" y="393" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">Playbook Generator</text>
+    <text x="1055" y="411" fill="#8b949e" font-size="10" text-anchor="middle">NIST 800-61 + Sigma</text>
   </g>
 
   <!-- NVD -->
   <g class="node" data-id="nvd">
-    <rect class="node-bg" x="500" y="65" width="115" height="50" rx="8" fill="rgba(210,153,34,0.12)"/>
-    <rect class="node-border" x="500" y="65" width="115" height="50" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
-    <text x="557" y="95" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">NVD API</text>
+    <rect class="node-bg" x="505" y="72" width="130" height="58" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="505" y="72" width="130" height="58" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="570" y="107" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">NVD API</text>
   </g>
 
   <!-- CISA KEV -->
   <g class="node" data-id="kev">
-    <rect class="node-bg" x="660" y="65" width="115" height="50" rx="8" fill="rgba(210,153,34,0.12)"/>
-    <rect class="node-border" x="660" y="65" width="115" height="50" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
-    <text x="717" y="95" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">CISA KEV</text>
+    <rect class="node-bg" x="670" y="72" width="130" height="58" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="670" y="72" width="130" height="58" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="735" y="107" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">CISA KEV</text>
   </g>
 
   <!-- OTX -->
   <g class="node" data-id="otx">
-    <rect class="node-bg" x="820" y="65" width="115" height="50" rx="8" fill="rgba(210,153,34,0.12)"/>
-    <rect class="node-border" x="820" y="65" width="115" height="50" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
-    <text x="877" y="95" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">OTX</text>
+    <rect class="node-bg" x="835" y="72" width="130" height="58" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="835" y="72" width="130" height="58" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="900" y="107" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">OTX</text>
   </g>
 
   <!-- ThreatFox -->
   <g class="node" data-id="threatfox">
-    <rect class="node-bg" x="980" y="65" width="115" height="50" rx="8" fill="rgba(210,153,34,0.12)"/>
-    <rect class="node-border" x="980" y="65" width="115" height="50" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
-    <text x="1037" y="95" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="500">ThreatFox</text>
+    <rect class="node-bg" x="1000" y="72" width="130" height="58" rx="8" fill="rgba(210,153,34,0.12)"/>
+    <rect class="node-border" x="1000" y="72" width="130" height="58" rx="8" fill="none" stroke="#d29922" stroke-width="1.5"/>
+    <text x="1065" y="107" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="500">ThreatFox</text>
   </g>
 
   <!-- Qdrant -->
   <g class="node" data-id="qdrant">
-    <rect class="node-bg" x="565" y="560" width="120" height="60" rx="8" fill="rgba(57,210,192,0.12)"/>
-    <rect class="node-border" x="565" y="560" width="120" height="60" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
-    <text x="625" y="587" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Qdrant</text>
-    <text x="625" y="602" fill="#8b949e" font-size="9" text-anchor="middle">Vector DB</text>
+    <rect class="node-bg" x="555" y="600" width="145" height="70" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="555" y="600" width="145" height="70" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="627" y="631" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">Qdrant</text>
+    <text x="627" y="648" fill="#8b949e" font-size="10" text-anchor="middle">Vector DB</text>
   </g>
 
   <!-- MITRE ATT&CK -->
   <g class="node" data-id="mitre">
-    <rect class="node-bg" x="755" y="560" width="135" height="60" rx="8" fill="rgba(57,210,192,0.12)"/>
-    <rect class="node-border" x="755" y="560" width="135" height="60" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
-    <text x="822" y="587" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">ATT&CK v18.1</text>
-    <text x="822" y="602" fill="#8b949e" font-size="9" text-anchor="middle">19K chunks</text>
+    <rect class="node-bg" x="745" y="600" width="160" height="70" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="745" y="600" width="160" height="70" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="825" y="631" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">ATT&CK v18.1</text>
+    <text x="825" y="648" fill="#8b949e" font-size="10" text-anchor="middle">19K chunks</text>
   </g>
 
   <!-- Ollama LLM -->
   <g class="node" data-id="llm">
-    <rect class="node-bg" x="960" y="560" width="150" height="60" rx="8" fill="rgba(57,210,192,0.12)"/>
-    <rect class="node-border" x="960" y="560" width="150" height="60" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
-    <text x="1035" y="587" fill="#e6edf3" font-size="11" text-anchor="middle" font-weight="600">Ollama LLM</text>
-    <text x="1035" y="602" fill="#8b949e" font-size="9" text-anchor="middle">Foundation-Sec-8B</text>
+    <rect class="node-bg" x="955" y="600" width="175" height="70" rx="8" fill="rgba(57,210,192,0.12)"/>
+    <rect class="node-border" x="955" y="600" width="175" height="70" rx="8" fill="none" stroke="#39d2c0" stroke-width="1.5"/>
+    <text x="1042" y="631" fill="#e6edf3" font-size="12" text-anchor="middle" font-weight="600">Ollama LLM</text>
+    <text x="1042" y="648" fill="#8b949e" font-size="10" text-anchor="middle">Foundation-Sec-8B</text>
   </g>
 
   <g id="particles"></g>
@@ -282,7 +282,7 @@
 </div>
 
 <footer>
-  <a href="https://github.com/ayansk11/Agentic_Cybersec_Threat_Analyst">View on GitHub</a>
+  <a href="https://github.com/ayansk11/Agentic-Cybersec-Threat-Analyst">View on GitHub</a>
 </footer>
 
 <script>
