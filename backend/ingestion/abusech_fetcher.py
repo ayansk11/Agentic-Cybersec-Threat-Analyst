@@ -18,7 +18,7 @@ def _headers() -> dict[str, str]:
     settings = get_settings()
     headers: dict[str, str] = {"Content-Type": "application/json"}
     if settings.threatfox_api_key:
-        headers["API-KEY"] = settings.threatfox_api_key
+        headers["Auth-Key"] = settings.threatfox_api_key
     return headers
 
 
