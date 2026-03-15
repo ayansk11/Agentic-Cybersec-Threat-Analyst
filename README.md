@@ -6,54 +6,51 @@ Built with LangGraph for agent orchestration, Qdrant for vector search, and a lo
 
 ## Architecture
 
-> **[Interactive Architecture Diagram](https://ayansk11.github.io/Agentic_Cybersec_Threat_Analyst/architecture.html)** — animated, clickable diagram with detailed node descriptions and live pipeline flow.
+> **Interactive version:** Open [`docs/architecture.html`](https://ayansk11.github.io/Agentic_Cybersec_Threat_Analyst/architecture.html) for an animated, clickable diagram with detailed node descriptions and live data-flow particles.
 
 ```mermaid
-flowchart LR
-    subgraph Client["  Client"]
+flowchart TB
+    subgraph Client["  Client  "]
+        direction LR
         User(["  User  "])
-        Frontend["  React Frontend  "]
+        Frontend["  React Dashboard  "]
+        User --> Frontend
     end
 
-    subgraph Gateway["  API Gateway"]
-        Backend["  FastAPI  \n  SSE + JWT + OAuth2  "]
+    subgraph Gateway["  API Gateway  "]
+        Backend["  FastAPI  \n  SSE · JWT · OAuth2  "]
     end
 
-    subgraph Pipeline["  LangGraph Agent Pipeline"]
-        A1["  Agent 1  \n  CVE Extractor  "]
-        A2["  Agent 2  \n  ATT&CK Classifier  "]
-        A3["  Agent 3  \n  Playbook Generator  "]
-    end
-
-    subgraph Intel["  Threat Intelligence"]
-        NVD[("  NVD API  ")]
+    subgraph Intel["  Threat Intelligence  "]
+        direction LR
+        NVD[("  NVD  ")]
         KEV[("  CISA KEV  ")]
-        OTX[("  AlienVault OTX  ")]
+        OTX[("  OTX  ")]
         TFox[("  ThreatFox  ")]
     end
 
-    subgraph Infra["  Infrastructure"]
-        Qdrant[("  Qdrant  \n  Vector DB  ")]
-        LLM["  Ollama LLM  \n  Foundation-Sec-8B  "]
-        MITRE["  MITRE ATT&CK  \n  v18.1 · 19K chunks  "]
+    subgraph Pipeline["  LangGraph Agent Pipeline  "]
+        direction TB
+        A1["  Agent 1 · CVE Extractor  "]
+        A2["  Agent 2 · ATT&CK Classifier  "]
+        A3["  Agent 3 · Playbook Generator  "]
+        A1 --> A2 --> A3
     end
 
-    User --> Frontend
+    subgraph Infra["  Infrastructure  "]
+        direction LR
+        Qdrant[("  Qdrant  \n  Vector DB  ")]
+        MITRE["  MITRE ATT&CK  \n  v18.1 · 19K chunks  "]
+        LLM["  Ollama  \n  Foundation-Sec-8B  "]
+    end
+
     Frontend -->|"SSE Stream"| Backend
-    Backend --> A1
-
-    A1 -->|"Enrich"| NVD
-    A1 -->|"Enrich"| KEV
-    A1 -->|"Enrich"| OTX
-    A1 -->|"Enrich"| TFox
-
-    A1 --> A2
+    Backend --> Pipeline
+    Intel -->|"Enrich"| Pipeline
     A2 -->|"Hybrid Search"| Qdrant
     A2 -->|"Classify"| LLM
-    Qdrant -.->|"Dense + Sparse"| MITRE
-
-    A2 --> A3
     A3 -->|"Generate"| LLM
+    Qdrant -.->|"Dense + Sparse"| MITRE
 
     style Client fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#58a6ff
     style Gateway fill:#161b22,stroke:#3fb950,stroke-width:2px,color:#3fb950
