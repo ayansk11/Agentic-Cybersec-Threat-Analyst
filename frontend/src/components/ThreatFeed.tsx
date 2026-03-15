@@ -132,6 +132,94 @@ function OTXPulseCard({ pulse }: { pulse: OTXPulseItem }) {
   );
 }
 
+function ThreatFoxCard({ ioc }: { ioc: ThreatFoxIOCItem }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <a
+      href={`https://threatfox.abuse.ch/ioc/${ioc.ioc_id}/`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-xl p-5 no-underline"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        border: `1px solid ${hovered ? 'var(--critical)' : 'var(--border)'}`,
+        cursor: 'pointer',
+        textDecoration: 'none',
+        color: 'inherit',
+        transform: hovered ? 'translateY(-1px)' : 'none',
+        boxShadow: hovered ? '0 4px 12px rgba(248, 81, 73, 0.15)' : 'none',
+        transition: 'all 0.25s ease',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+        <Bug className="w-4 h-4" style={{ color: 'var(--critical)' }} />
+        <span
+          className="px-2 py-0.5 rounded text-xs font-bold font-mono"
+          style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+        >
+          {ioc.ioc_type}
+        </span>
+        {ioc.malware && (
+          <span
+            className="px-2 py-0.5 rounded text-xs font-bold"
+            style={{ backgroundColor: 'var(--critical)20', color: 'var(--critical)', border: '1px solid var(--critical)40' }}
+          >
+            {ioc.malware}
+          </span>
+        )}
+        <ExternalLink
+          className="w-3 h-3 ml-auto shrink-0"
+          style={{
+            color: hovered ? 'var(--critical)' : 'var(--text-secondary)',
+            transition: 'color 0.25s ease',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          maxHeight: hovered ? '200px' : '1.6em',
+          overflow: 'hidden',
+          transition: 'max-height 0.35s ease',
+        }}
+      >
+        <p className="text-sm font-mono" style={{ color: 'var(--text-primary)', wordBreak: 'break-all' }}>
+          {ioc.ioc_value}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3 mt-3" style={{ flexWrap: 'wrap' }}>
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {ioc.threat_type}
+        </span>
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          Confidence: {ioc.confidence_level}%
+        </span>
+        {(hovered ? ioc.tags : ioc.tags.slice(0, 3)).map((tag) => (
+          <span
+            key={tag}
+            className="px-2 py-0.5 rounded text-xs"
+            style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          >
+            {tag}
+          </span>
+        ))}
+        {!hovered && ioc.tags.length > 3 && (
+          <span className="text-xs" style={{ color: 'var(--critical)' }}>
+            +{ioc.tags.length - 3} more
+          </span>
+        )}
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {formatDate(ioc.first_seen)}
+        </span>
+      </div>
+    </a>
+  );
+}
+
 interface ThreatFeedProps {
   onAnalyze?: (cveId: string) => void;
 }
@@ -338,56 +426,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
       {!loading && activeTab === 'threatfox' && threatfoxItems.length > 0 && (
         <div className="space-y-3">
           {threatfoxItems.map((ioc) => (
-            <div
-              key={ioc.ioc_id}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-                    <Bug className="w-4 h-4" style={{ color: 'var(--critical)' }} />
-                    <span
-                      className="px-2 py-0.5 rounded text-xs font-bold font-mono"
-                      style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
-                    >
-                      {ioc.ioc_type}
-                    </span>
-                    {ioc.malware && (
-                      <span
-                        className="px-2 py-0.5 rounded text-xs font-bold"
-                        style={{ backgroundColor: 'var(--critical)20', color: 'var(--critical)', border: '1px solid var(--critical)40' }}
-                      >
-                        {ioc.malware}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm font-mono mb-2 truncate" style={{ color: 'var(--text-primary)' }}>
-                    {ioc.ioc_value}
-                  </p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {ioc.threat_type}
-                    </span>
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      Confidence: {ioc.confidence_level}%
-                    </span>
-                    {ioc.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-0.5 rounded text-xs"
-                        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {formatDate(ioc.first_seen)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ThreatFoxCard key={ioc.ioc_id} ioc={ioc} />
           ))}
         </div>
       )}
