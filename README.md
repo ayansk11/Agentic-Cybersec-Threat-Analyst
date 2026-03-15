@@ -69,7 +69,7 @@ flowchart LR
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/your-username/Agentic_Cybersec_Threat_Analyst.git
+git clone https://github.com/ayansk11/Agentic_Cybersec_Threat_Analyst.git
 cd Agentic_Cybersec_Threat_Analyst
 
 # Backend
