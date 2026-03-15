@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Rss, Loader2, AlertCircle, RefreshCw, Search, Calendar, Globe, Bug } from 'lucide-react';
+import { Rss, Loader2, AlertCircle, RefreshCw, Search, Calendar, Globe, Bug, ExternalLink } from 'lucide-react';
 import { fetchRecentCVEs, fetchOTXFeed, fetchThreatFoxFeed } from '../api/client';
 import type { FeedItem, OTXPulseItem, ThreatFoxIOCItem } from '../api/client';
 
@@ -246,10 +246,29 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
       {!loading && activeTab === 'otx' && otxItems.length > 0 && (
         <div className="space-y-3">
           {otxItems.map((pulse) => (
-            <div
+            <a
               key={pulse.pulse_id}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
+              href={`https://otx.alienvault.com/pulse/${pulse.pulse_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-xl p-5 transition-all no-underline"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(88, 166, 255, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               <div className="flex items-center gap-2.5 mb-2 flex-wrap">
                 <Globe className="w-4 h-4" style={{ color: 'var(--accent)' }} />
@@ -262,6 +281,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
                     {pulse.adversary}
                   </span>
                 )}
+                <ExternalLink className="w-3 h-3 ml-auto shrink-0" style={{ color: 'var(--text-secondary)' }} />
               </div>
               <p className="text-sm mb-3 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
                 {pulse.description || 'No description.'}
@@ -283,7 +303,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
                   {formatDate(pulse.created)}
                 </span>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       )}
