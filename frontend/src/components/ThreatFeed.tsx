@@ -49,6 +49,89 @@ function formatDate(dateStr: string | null): string {
   }
 }
 
+function OTXPulseCard({ pulse }: { pulse: OTXPulseItem }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <a
+      href={`https://otx.alienvault.com/pulse/${pulse.pulse_id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-xl p-5 no-underline"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        border: `1px solid ${hovered ? 'var(--accent)' : 'var(--border)'}`,
+        cursor: 'pointer',
+        textDecoration: 'none',
+        color: 'inherit',
+        transform: hovered ? 'translateY(-1px)' : 'none',
+        boxShadow: hovered ? '0 4px 12px rgba(88, 166, 255, 0.15)' : 'none',
+        transition: 'all 0.25s ease',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+        <Globe className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+        <span className="text-sm font-bold">{pulse.name}</span>
+        {pulse.adversary && (
+          <span
+            className="px-2 py-0.5 rounded text-xs font-bold"
+            style={{ backgroundColor: 'var(--high)20', color: 'var(--high)', border: '1px solid var(--high)40' }}
+          >
+            {pulse.adversary}
+          </span>
+        )}
+        <ExternalLink
+          className="w-3 h-3 ml-auto shrink-0"
+          style={{
+            color: hovered ? 'var(--accent)' : 'var(--text-secondary)',
+            transition: 'color 0.25s ease',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          maxHeight: hovered ? '500px' : '2.8em',
+          overflow: 'hidden',
+          transition: 'max-height 0.35s ease',
+        }}
+      >
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          {pulse.description || 'No description.'}
+        </p>
+      </div>
+
+      <div
+        className="flex items-center gap-3 mt-3"
+        style={{ flexWrap: 'wrap' }}
+      >
+        <span className="text-xs font-medium" style={{ color: 'var(--accent)' }}>
+          {pulse.ioc_count} IOCs
+        </span>
+        {(hovered ? pulse.tags : pulse.tags.slice(0, 5)).map((tag) => (
+          <span
+            key={tag}
+            className="px-2 py-0.5 rounded text-xs"
+            style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          >
+            {tag}
+          </span>
+        ))}
+        {!hovered && pulse.tags.length > 5 && (
+          <span className="text-xs" style={{ color: 'var(--accent)' }}>
+            +{pulse.tags.length - 5} more
+          </span>
+        )}
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {formatDate(pulse.created)}
+        </span>
+      </div>
+    </a>
+  );
+}
+
 interface ThreatFeedProps {
   onAnalyze?: (cveId: string) => void;
 }
@@ -246,64 +329,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
       {!loading && activeTab === 'otx' && otxItems.length > 0 && (
         <div className="space-y-3">
           {otxItems.map((pulse) => (
-            <a
-              key={pulse.pulse_id}
-              href={`https://otx.alienvault.com/pulse/${pulse.pulse_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-xl p-5 transition-all no-underline"
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(88, 166, 255, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-                <Globe className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-                <span className="text-sm font-bold">{pulse.name}</span>
-                {pulse.adversary && (
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-bold"
-                    style={{ backgroundColor: 'var(--high)20', color: 'var(--high)', border: '1px solid var(--high)40' }}
-                  >
-                    {pulse.adversary}
-                  </span>
-                )}
-                <ExternalLink className="w-3 h-3 ml-auto shrink-0" style={{ color: 'var(--text-secondary)' }} />
-              </div>
-              <p className="text-sm mb-3 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                {pulse.description || 'No description.'}
-              </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs font-medium" style={{ color: 'var(--accent)' }}>
-                  {pulse.ioc_count} IOCs
-                </span>
-                {pulse.tags.slice(0, 5).map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 rounded text-xs"
-                    style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {formatDate(pulse.created)}
-                </span>
-              </div>
-            </a>
+            <OTXPulseCard key={pulse.pulse_id} pulse={pulse} />
           ))}
         </div>
       )}
