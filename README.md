@@ -9,20 +9,18 @@ Built with LangGraph for agent orchestration, Qdrant for vector search, and a lo
 > **Interactive version:** Open [`docs/architecture.html`](https://ayansk11.github.io/Agentic_Cybersec_Threat_Analyst/docs/architecture.html) for an animated, clickable diagram with detailed node descriptions and live data-flow particles.
 
 ```mermaid
-flowchart TD
+flowchart LR
     User(["User"]) --> Frontend["React Dashboard"]
-    Frontend -->|"SSE Stream"| Backend["FastAPI · JWT · OAuth2"]
-    Backend --> A1
-
-    NVD[("NVD")] & KEV[("CISA KEV")] & OTX[("OTX")] & TFox[("ThreatFox")] -.->|"Enrich"| A1
-
-    A1["Agent 1: CVE Extractor"] --> A2["Agent 2: ATT&CK Classifier"]
+    Frontend -->|"SSE"| Backend["FastAPI"]
+    Backend --> A1["Agent 1: CVE Extractor"]
+    A1 --> A2["Agent 2: ATT&CK Classifier"]
     A2 --> A3["Agent 3: Playbook Generator"]
 
+    NVD[("NVD")] & KEV[("CISA KEV")] & OTX[("OTX")] & TFox[("ThreatFox")] -.-> A1
+
     A2 -->|"Hybrid Search"| Qdrant[("Qdrant")]
-    A2 -->|"Classify"| LLM["Ollama · Foundation-Sec-8B"]
-    A3 -->|"Generate"| LLM
-    Qdrant -.->|"Dense + Sparse"| MITRE["MITRE ATT&CK v18.1"]
+    Qdrant -.-> MITRE["ATT&CK v18.1"]
+    A2 & A3 -->|"Inference"| LLM["Foundation-Sec-8B"]
 
     style User fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
     style Frontend fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
