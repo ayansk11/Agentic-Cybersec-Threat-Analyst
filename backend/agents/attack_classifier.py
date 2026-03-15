@@ -77,6 +77,9 @@ def _parse_techniques_json(text: str) -> list[dict]:
     """Extract technique classifications from LLM output."""
     # Strip <think>...</think> reasoning traces
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    # Handle missing opening <think> tag — strip everything before </think>
+    if "</think>" in text:
+        text = text.split("</think>")[-1]
     # Strip markdown code fences
     text = re.sub(r"```json\s*", "", text)
     text = re.sub(r"```\s*", "", text)

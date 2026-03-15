@@ -160,6 +160,9 @@ def _parse_llm_json(text: str) -> dict:
     """Extract JSON from LLM output, handling <think> tags and code fences."""
     # Remove <think>...</think> blocks (Foundation-Sec reasoning traces)
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    # Handle missing opening <think> tag — strip everything before </think>
+    if "</think>" in text:
+        text = text.split("</think>")[-1]
 
     # Remove markdown code fences
     text = re.sub(r"```json\s*", "", text)

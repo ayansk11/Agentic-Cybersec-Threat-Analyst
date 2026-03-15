@@ -6,7 +6,7 @@ Built with LangGraph for agent orchestration, Qdrant for vector search, and a lo
 
 ## Architecture
 
-> **Interactive version:** Open [`docs/architecture.html`](docs/architecture.html) locally for an animated, clickable diagram with detailed node descriptions.
+> **[Interactive Architecture Diagram](https://ayansk11.github.io/Agentic_Cybersec_Threat_Analyst/architecture.html)** — animated, clickable diagram with detailed node descriptions and live pipeline flow.
 
 ```mermaid
 flowchart LR

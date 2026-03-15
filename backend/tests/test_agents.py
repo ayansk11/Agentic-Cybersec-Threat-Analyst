@@ -93,6 +93,23 @@ class TestParseLLMJson:
         result = _parse_llm_json("")
         assert result.get("parse_error") is True
 
+    def test_missing_opening_think_tag(self):
+        """Model outputs JSON inside reasoning then </think> then actual JSON."""
+        from backend.agents.cve_extractor import _parse_llm_json
+
+        data = '{"wrong": "inside think"}\n</think>\n\n{"summary": "correct"}'
+        result = _parse_llm_json(data)
+        assert result["summary"] == "correct"
+        assert "parse_error" not in result
+
+    def test_think_with_json_inside(self):
+        """Full <think> block containing JSON-like content."""
+        from backend.agents.cve_extractor import _parse_llm_json
+
+        data = '<think>{"reasoning": "step1"}</think>\n{"summary": "real"}'
+        result = _parse_llm_json(data)
+        assert result["summary"] == "real"
+
 
 # ── ATT&CK Classifier parsing ────────────────────────────────────────
 
