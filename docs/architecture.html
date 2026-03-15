@@ -130,28 +130,28 @@
     <!-- Agent2 -> Agent3 (one-way) -->
     <line id="e-a2-a3" x1="770" y1="255" x2="810" y2="255" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
 
-    <!-- Agent1 <-> NVD (bidirectional, diagonal fan-out) -->
-    <line id="e-a1-nvd" x1="485" y1="220" x2="500" y2="89" stroke="#d29922" stroke-width="1.3" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)"/>
+    <!-- Agent1 -> NVD (queries for enrichment) -->
+    <line id="e-a1-nvd" x1="485" y1="220" x2="500" y2="89" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
-    <!-- Agent1 <-> KEV (bidirectional) -->
-    <line id="e-a1-kev" x1="500" y1="220" x2="630" y2="89" stroke="#d29922" stroke-width="1.3" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)"/>
+    <!-- Agent1 -> KEV -->
+    <line id="e-a1-kev" x1="500" y1="220" x2="630" y2="89" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
-    <!-- Agent1 <-> OTX (bidirectional) -->
-    <line id="e-a1-otx" x1="520" y1="220" x2="760" y2="89" stroke="#d29922" stroke-width="1.3" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)"/>
+    <!-- Agent1 -> OTX -->
+    <line id="e-a1-otx" x1="520" y1="220" x2="760" y2="89" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
-    <!-- Agent1 <-> ThreatFox (bidirectional) -->
-    <line id="e-a1-tf" x1="540" y1="220" x2="890" y2="89" stroke="#d29922" stroke-width="1.3" marker-start="url(#arrow-orange)" marker-end="url(#arrow-orange)"/>
+    <!-- Agent1 -> ThreatFox -->
+    <line id="e-a1-tf" x1="540" y1="220" x2="890" y2="89" stroke="#d29922" stroke-width="1.3" marker-end="url(#arrow-orange)"/>
 
-    <!-- Agent2 <-> Qdrant (bidirectional, diagonal) -->
-    <line id="e-a2-qdrant" x1="670" y1="280" x2="560" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-start="url(#arrow-cyan)" marker-end="url(#arrow-cyan)"/>
+    <!-- Agent2 -> Qdrant (hybrid search) -->
+    <line id="e-a2-qdrant" x1="670" y1="280" x2="560" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
     <text x="600" y="345" fill="#39d2c0" font-size="9">Hybrid Search</text>
 
-    <!-- Agent2 <-> LLM (bidirectional, diagonal) -->
-    <line id="e-a2-llm" x1="720" y1="280" x2="870" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-start="url(#arrow-cyan)" marker-end="url(#arrow-cyan)"/>
+    <!-- Agent2 -> LLM (classify) -->
+    <line id="e-a2-llm" x1="720" y1="280" x2="870" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
     <text x="810" y="345" fill="#39d2c0" font-size="9">Classify</text>
 
-    <!-- Agent3 <-> LLM (bidirectional, vertical) -->
-    <line id="e-a3-llm" x1="890" y1="280" x2="895" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-start="url(#arrow-cyan)" marker-end="url(#arrow-cyan)"/>
+    <!-- Agent3 -> LLM (generate) -->
+    <line id="e-a3-llm" x1="890" y1="280" x2="895" y2="420" stroke="#39d2c0" stroke-width="1.3" marker-end="url(#arrow-cyan)"/>
     <text x="905" y="355" fill="#39d2c0" font-size="9">Generate</text>
 
     <!-- Qdrant -- MITRE (dashed, one-way) -->
