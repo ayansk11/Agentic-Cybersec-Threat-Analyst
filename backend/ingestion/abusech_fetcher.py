@@ -1,17 +1,31 @@
 """abuse.ch ThreatFox API client for fetching IOCs."""
 
 import asyncio
+import logging
 import sys
 
 import httpx
 
+from backend.config import get_settings
+
 THREATFOX_API_URL = "https://threatfox-api.abuse.ch/api/v1/"
+
+logger = logging.getLogger("backend.threatfox")
+
+
+def _headers() -> dict[str, str]:
+    """Build request headers, including API-KEY if configured."""
+    settings = get_settings()
+    headers: dict[str, str] = {"Content-Type": "application/json"}
+    if settings.threatfox_api_key:
+        headers["API-KEY"] = settings.threatfox_api_key
+    return headers
 
 
 async def fetch_threatfox_by_cve(cve_id: str) -> list[dict]:
     """Search ThreatFox for IOCs associated with a CVE.
 
-    No API key required. Returns list of parsed IOC dicts.
+    Returns list of parsed IOC dicts.
     """
     from backend.cache import cve_cache
 
@@ -23,10 +37,11 @@ async def fetch_threatfox_by_cve(cve_id: str) -> list[dict]:
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(THREATFOX_API_URL, json=body)
+            resp = await client.post(THREATFOX_API_URL, json=body, headers=_headers())
             resp.raise_for_status()
             data = resp.json()
-    except (httpx.HTTPError, httpx.TimeoutException):
+    except (httpx.HTTPError, httpx.TimeoutException) as exc:
+        logger.warning("ThreatFox CVE lookup failed: %s", exc)
         return []
 
     if data.get("query_status") != "ok":
@@ -44,16 +59,20 @@ async def fetch_threatfox_by_cve(cve_id: str) -> list[dict]:
 async def fetch_threatfox_recent(days: int = 7, limit: int = 50) -> list[dict]:
     """Fetch recent IOCs from ThreatFox.
 
-    No API key required. Returns list of parsed IOC dicts.
+    Returns list of parsed IOC dicts.
     """
     body = {"query": "get_iocs", "days": min(days, 7)}
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(THREATFOX_API_URL, json=body)
+            resp = await client.post(THREATFOX_API_URL, json=body, headers=_headers())
+            if resp.status_code == 401:
+                logger.warning("ThreatFox API returned 401 — set THREATFOX_API_KEY in .env")
+                return []
             resp.raise_for_status()
             data = resp.json()
-    except (httpx.HTTPError, httpx.TimeoutException):
+    except (httpx.HTTPError, httpx.TimeoutException) as exc:
+        logger.warning("ThreatFox recent feed failed: %s", exc)
         return []
 
     if data.get("query_status") != "ok":

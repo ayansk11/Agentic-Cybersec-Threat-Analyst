@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     otx_api_key: str = ""
     otx_base_url: str = "https://otx.alienvault.com/api/v1"
 
+    # ThreatFox (abuse.ch)
+    threatfox_api_key: str = ""
+
     # NVD
     nvd_api_key: str = ""
     nvd_base_url: str = "https://services.nvd.nist.gov/rest/json/cves/2.0"

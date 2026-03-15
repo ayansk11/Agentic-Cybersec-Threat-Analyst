@@ -422,7 +422,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
         >
           <Bug className="w-10 h-10 mb-3" style={{ color: 'var(--text-secondary)' }} />
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            No ThreatFox IOCs found for the last {days} day{days > 1 ? 's' : ''}.
+            No ThreatFox IOCs found. Set THREATFOX_API_KEY in .env to enable this feed.
           </p>
         </div>
       )}
