@@ -8,6 +8,11 @@ VERSION := $(shell cat VERSION)
 setup:
 	cd backend && pip install -e ".[dev]"
 	cd frontend && pnpm install
+	@echo "Ensuring Ollama is running..."
+	@if ! curl -sf http://localhost:11434 > /dev/null 2>&1; then \
+		ollama serve & \
+		sleep 2; \
+	fi
 	ollama pull hf.co/fdtn-ai/Foundation-Sec-8B-Reasoning-Q4_K_M-GGUF
 	docker compose up -d qdrant
 	@echo "Waiting for Qdrant to be ready..."
