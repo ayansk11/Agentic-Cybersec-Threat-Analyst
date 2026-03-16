@@ -137,7 +137,7 @@ function ThreatFoxCard({ ioc }: { ioc: ThreatFoxIOCItem }) {
 
   return (
     <a
-      href={`https://threatfox.abuse.ch/ioc/${ioc.ioc_id}/`}
+      href={ioc.ioc_id ? `https://threatfox.abuse.ch/ioc/${ioc.ioc_id}/` : `https://threatfox.abuse.ch/browse.php?search=ioc%3A${encodeURIComponent(ioc.ioc_value)}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block rounded-xl p-5 no-underline"
@@ -215,6 +215,107 @@ function ThreatFoxCard({ ioc }: { ioc: ThreatFoxIOCItem }) {
         <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
           {formatDate(ioc.first_seen)}
         </span>
+      </div>
+    </a>
+  );
+}
+
+function CVECard({ item, onAnalyze }: { item: FeedItem; onAnalyze?: (cveId: string) => void }) {
+  const [hovered, setHovered] = useState(false);
+
+  const severityColor = {
+    CRITICAL: 'var(--critical)',
+    HIGH: 'var(--high)',
+    MEDIUM: 'var(--medium)',
+    LOW: 'var(--low)',
+  }[item.severity?.toUpperCase()] || 'var(--accent)';
+
+  return (
+    <a
+      href={`https://nvd.nist.gov/vuln/detail/${item.cve_id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-xl p-5 no-underline"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        border: `1px solid ${hovered ? severityColor : 'var(--border)'}`,
+        cursor: 'pointer',
+        textDecoration: 'none',
+        color: 'inherit',
+        transform: hovered ? 'translateY(-1px)' : 'none',
+        boxShadow: hovered ? `0 4px 12px ${severityColor}25` : 'none',
+        transition: 'all 0.25s ease',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+            <Rss className="w-4 h-4" style={{ color: severityColor }} />
+            <span className="text-sm font-bold">{item.cve_id}</span>
+            <SeverityBadge severity={item.severity} />
+            {item.in_kev && (
+              <span
+                className="px-2 py-0.5 rounded text-xs font-bold shrink-0"
+                style={{ backgroundColor: 'var(--critical)20', color: 'var(--critical)', border: '1px solid var(--critical)40' }}
+              >
+                CISA KEV
+              </span>
+            )}
+            <ExternalLink
+              className="w-3 h-3 ml-auto shrink-0"
+              style={{
+                color: hovered ? severityColor : 'var(--text-secondary)',
+                transition: 'color 0.25s ease',
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              maxHeight: hovered ? '500px' : '2.8em',
+              overflow: 'hidden',
+              transition: 'max-height 0.35s ease',
+            }}
+          >
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              {item.description || 'No description available.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 mt-3 flex-wrap">
+            <CVSSScore score={item.cvss_score} />
+            {item.cwes.length > 0 && (
+              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                {item.cwes.join(', ')}
+              </span>
+            )}
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              Published: {formatDate(item.published)}
+            </span>
+          </div>
+        </div>
+        {onAnalyze && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAnalyze(item.cve_id);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium cursor-pointer shrink-0"
+            style={{
+              backgroundColor: hovered ? 'var(--accent)' : 'var(--accent)',
+              color: 'white',
+              border: 'none',
+              opacity: hovered ? 1 : 0.85,
+              transition: 'opacity 0.25s ease',
+            }}
+          >
+            <Search className="w-3.5 h-3.5" />
+            Analyze
+          </button>
+        )}
       </div>
     </a>
   );
@@ -363,52 +464,7 @@ export function ThreatFeed({ onAnalyze }: ThreatFeedProps) {
       {!loading && activeTab === 'nvd' && items.length > 0 && (
         <div className="space-y-3">
           {items.map((item) => (
-            <div
-              key={item.cve_id}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-                    <span className="text-sm font-bold">{item.cve_id}</span>
-                    <SeverityBadge severity={item.severity} />
-                    {item.in_kev && (
-                      <span
-                        className="px-2 py-0.5 rounded text-xs font-bold shrink-0"
-                        style={{ backgroundColor: 'var(--critical)20', color: 'var(--critical)', border: '1px solid var(--critical)40' }}
-                      >
-                        CISA KEV
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm mb-3 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                    {item.description || 'No description available.'}
-                  </p>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <CVSSScore score={item.cvss_score} />
-                    {item.cwes.length > 0 && (
-                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                        {item.cwes.join(', ')}
-                      </span>
-                    )}
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      Published: {formatDate(item.published)}
-                    </span>
-                  </div>
-                </div>
-                {onAnalyze && (
-                  <button
-                    onClick={() => onAnalyze(item.cve_id)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium cursor-pointer shrink-0"
-                    style={{ backgroundColor: 'var(--accent)', color: 'white', border: 'none' }}
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    Analyze
-                  </button>
-                )}
-              </div>
-            </div>
+            <CVECard key={item.cve_id} item={item} onAnalyze={onAnalyze} />
           ))}
         </div>
       )}

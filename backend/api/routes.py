@@ -29,6 +29,7 @@ from backend.api.schemas import (
     ThreatFoxIOCItem,
 )
 from backend.config import get_settings
+from backend.version import __version__
 from backend.db import (
     get_analysis,
     get_analysis_history,
@@ -56,6 +57,17 @@ def _scoped_user_id(user: CurrentUser) -> int | None:
     if user.role == "admin":
         return None
     return user.id
+
+
+# ---------------------------------------------------------------------------
+# Version (public, no auth)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/version")
+async def get_app_version():
+    """Return the current application version."""
+    return {"version": __version__}
 
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,6 @@
-.PHONY: install dev frontend qdrant ingest test lint clean docker-up docker-down docker-build docker-logs docker-monitoring setup run stop
+.PHONY: install dev frontend qdrant ingest test lint clean docker-up docker-down docker-build docker-logs docker-monitoring setup run stop version version-bump-patch version-bump-minor version-bump-major
+
+VERSION := $(shell cat VERSION)
 
 # ── Quick Start ─────────────────────────────────────────────────────
 
@@ -13,13 +15,10 @@ setup:
 	PYTHONPATH=. python -m backend.ingestion.ingest_attack
 	@echo "\n✅ Setup complete! Run 'make run' to start the app."
 
-# Start everything (Qdrant + Backend + Frontend)
+# Start everything (Qdrant + Backend + Frontend) — single command, colored output
 run:
-	docker compose up -d qdrant
-	@echo "Starting backend and frontend..."
-	@PYTHONPATH=. uvicorn backend.main:app --reload --port 8000 & \
-	(cd frontend && pnpm dev) & \
-	wait
+	@echo "Starting all services (v$(VERSION))..."
+	honcho start -f Procfile.dev
 
 # Stop background services
 stop:
@@ -53,6 +52,24 @@ ingest:
 # Pull the Foundation-Sec model
 pull-model:
 	ollama pull hf.co/fdtn-ai/Foundation-Sec-8B-Reasoning-Q4_K_M-GGUF
+
+# ── Versioning ─────────────────────────────────────────────────────────
+
+# Show current version
+version:
+	@echo $(VERSION)
+
+# Bump patch version (0.1.0 → 0.1.1)
+version-bump-patch:
+	@python3 scripts/bump_version.py patch
+
+# Bump minor version (0.1.0 → 0.2.0)
+version-bump-minor:
+	@python3 scripts/bump_version.py minor
+
+# Bump major version (0.1.0 → 1.0.0)
+version-bump-major:
+	@python3 scripts/bump_version.py major
 
 # ── Testing ──────────────────────────────────────────────────────────
 

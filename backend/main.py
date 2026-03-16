@@ -14,6 +14,7 @@ from backend.api.routes import router
 from backend.config import get_settings
 from backend.db import init_db
 from backend.logging_config import RequestLoggingMiddleware, setup_logging
+from backend.version import __version__
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -31,7 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Cybersecurity Threat Analyst API",
     description="Multi-agent threat analysis with MITRE ATT&CK RAG",
-    version="0.1.0",
+    version=__version__,
     lifespan=lifespan,
 )
 

@@ -78,8 +78,17 @@ async def fetch_threatfox_recent(days: int = 7, limit: int = 50) -> list[dict]:
     if data.get("query_status") != "ok":
         return []
 
-    entries = data.get("data", [])
-    if not isinstance(entries, list):
+    raw_data = data.get("data", [])
+    # get_iocs returns a dict keyed by date, not a flat list
+    entries: list[dict] = []
+    if isinstance(raw_data, list):
+        entries = raw_data
+    elif isinstance(raw_data, dict):
+        # Flatten: {"2026-03-15": [{...}, ...], "2026-03-14": [...]} → [...]
+        for day_entries in raw_data.values():
+            if isinstance(day_entries, list):
+                entries.extend(day_entries)
+    else:
         return []
 
     return [_parse_threatfox_ioc(e) for e in entries[:limit]]
@@ -94,7 +103,7 @@ def _parse_threatfox_ioc(entry: dict) -> dict:
         "threat_type": entry.get("threat_type", ""),
         "malware": entry.get("malware_printable", "") or "",
         "confidence_level": entry.get("confidence_level", 0) or 0,
-        "first_seen": entry.get("first_seen_utc"),
+        "first_seen": entry.get("first_seen_utc") or entry.get("first_seen"),
         "tags": entry.get("tags") or [],
     }
 

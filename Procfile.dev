@@ -1,0 +1,3 @@
+qdrant: docker compose up qdrant 2>&1
+backend: ./scripts/wait-for-qdrant.sh && PYTHONPATH=. uvicorn backend.main:app --reload --port 8000
+frontend: cd frontend && pnpm dev

@@ -64,6 +64,7 @@ export function Layout({ children, activePage, onNavigate }: LayoutProps) {
         <div className="p-4 mx-3 mb-3 rounded-lg text-xs" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
           <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Foundation-Sec-8B</p>
           <p>Reasoning Q4_K_M via Ollama</p>
+          <p className="mt-1 opacity-60">v{__APP_VERSION__}</p>
         </div>
       </aside>
 
