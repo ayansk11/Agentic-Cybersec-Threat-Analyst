@@ -22,6 +22,10 @@ setup:
 
 # Start everything (Qdrant + Backend + Frontend) — single command, colored output
 run:
+	@if lsof -ti:8000 > /dev/null 2>&1; then \
+		echo "⚠️  Port 8000 is in use. Run 'make stop' first."; \
+		exit 1; \
+	fi
 	@echo "Starting all services (v$(VERSION))..."
 	honcho start -f Procfile.dev
 
@@ -29,6 +33,7 @@ run:
 stop:
 	@-pkill -f "uvicorn backend.main:app" 2>/dev/null || true
 	@-pkill -f "vite" 2>/dev/null || true
+	@-lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 	docker compose down
 	@echo "All services stopped."
 
