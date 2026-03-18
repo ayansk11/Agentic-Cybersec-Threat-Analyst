@@ -22,19 +22,19 @@ flowchart LR
     Qdrant -.-> MITRE["ATT&CK v18.1"]
     A2 & A3 -->|"Inference"| LLM["Foundation-Sec-8B"]
 
-    style User fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
-    style Frontend fill:#58a6ff22,stroke:#58a6ff,color:#e6edf3
-    style Backend fill:#3fb95022,stroke:#3fb950,color:#e6edf3
-    style A1 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
-    style A2 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
-    style A3 fill:#bc8cff22,stroke:#bc8cff,color:#e6edf3
-    style NVD fill:#d2992222,stroke:#d29922,color:#e6edf3
-    style KEV fill:#d2992222,stroke:#d29922,color:#e6edf3
-    style OTX fill:#d2992222,stroke:#d29922,color:#e6edf3
-    style TFox fill:#d2992222,stroke:#d29922,color:#e6edf3
-    style Qdrant fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
-    style LLM fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
-    style MITRE fill:#39d2c022,stroke:#39d2c0,color:#e6edf3
+    style User fill:#1a3a5c,stroke:#58a6ff,color:#e6edf3
+    style Frontend fill:#1a3a5c,stroke:#58a6ff,color:#e6edf3
+    style Backend fill:#1a3d1f,stroke:#3fb950,color:#e6edf3
+    style A1 fill:#2d1f4e,stroke:#bc8cff,color:#e6edf3
+    style A2 fill:#2d1f4e,stroke:#bc8cff,color:#e6edf3
+    style A3 fill:#2d1f4e,stroke:#bc8cff,color:#e6edf3
+    style NVD fill:#3d2a0a,stroke:#d29922,color:#e6edf3
+    style KEV fill:#3d2a0a,stroke:#d29922,color:#e6edf3
+    style OTX fill:#3d2a0a,stroke:#d29922,color:#e6edf3
+    style TFox fill:#3d2a0a,stroke:#d29922,color:#e6edf3
+    style Qdrant fill:#0f3d38,stroke:#39d2c0,color:#e6edf3
+    style LLM fill:#0f3d38,stroke:#39d2c0,color:#e6edf3
+    style MITRE fill:#0f3d38,stroke:#39d2c0,color:#e6edf3
 ```
 
 ### Agent Pipeline
