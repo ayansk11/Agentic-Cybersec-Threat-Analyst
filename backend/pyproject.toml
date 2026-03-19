@@ -1,6 +1,6 @@
 [project]
 name = "threat-analyst"
-version = "1.0.0"
+version = "2.0.0"
 description = "Multi-agent cybersecurity threat analyst with MITRE ATT&CK RAG"
 requires-python = ">=3.11"
 dependencies = [
