@@ -160,5 +160,7 @@ def get_llm(model_id: str | None = None):
         model=ollama_model,
         base_url=settings.ollama_base_url,
         temperature=0,
-        timeout=300,
+        num_predict=4096,
+        num_ctx=8192,
+        client_kwargs={"timeout": 300.0},
     )
