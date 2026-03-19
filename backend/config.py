@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+import httpx
 from pydantic_settings import BaseSettings
 
 # ── Model Registry ──────────────────────────────────────────────────────
@@ -156,11 +157,14 @@ def get_llm(model_id: str | None = None):
     if model_id and model_id in AVAILABLE_MODELS:
         ollama_model = AVAILABLE_MODELS[model_id]["ollama_name"]
 
+    # timeout applies to both sync (invoke) and async (ainvoke) calls
+    _timeout = httpx.Timeout(timeout=300.0, connect=30.0)
     return ChatOllama(
         model=ollama_model,
         base_url=settings.ollama_base_url,
         temperature=0,
         num_predict=4096,
         num_ctx=8192,
-        client_kwargs={"timeout": 300.0},
+        client_kwargs={"timeout": _timeout},
+        sync_client_kwargs={"timeout": _timeout},
     )
