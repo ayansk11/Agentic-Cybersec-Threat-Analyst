@@ -56,12 +56,16 @@ def validate_input(cve_id: str, description: str) -> list[dict]:
     # CVE ID format check (if provided)
     if cve_id:
         if len(cve_id) > MAX_CVE_ID_LENGTH:
-            raise GuardrailViolation("INVALID_CVE_ID", f"CVE ID too long (max {MAX_CVE_ID_LENGTH} chars)")
+            raise GuardrailViolation(
+                "INVALID_CVE_ID", f"CVE ID too long (max {MAX_CVE_ID_LENGTH} chars)"
+            )
         if not CVE_PATTERN.match(cve_id):
-            warnings.append({
-                "code": "CVE_FORMAT_WARNING",
-                "message": f"'{cve_id}' does not match standard CVE format (CVE-YYYY-NNNNN). Proceeding anyway.",
-            })
+            warnings.append(
+                {
+                    "code": "CVE_FORMAT_WARNING",
+                    "message": f"'{cve_id}' does not match standard CVE format (CVE-YYYY-NNNNN). Proceeding anyway.",
+                }
+            )
 
     # Description length check
     if description and len(description) > MAX_DESCRIPTION_LENGTH:
@@ -72,7 +76,9 @@ def validate_input(cve_id: str, description: str) -> list[dict]:
 
     # Must have at least one input
     if not cve_id and not description:
-        raise GuardrailViolation("EMPTY_INPUT", "Provide either a CVE ID or vulnerability description")
+        raise GuardrailViolation(
+            "EMPTY_INPUT", "Provide either a CVE ID or vulnerability description"
+        )
 
     # Prompt injection detection
     text = f"{cve_id} {description}"
@@ -95,11 +101,13 @@ def validate_techniques(techniques: list[dict]) -> list[dict]:
     for tech in techniques:
         tid = tech.get("technique_id", "")
         if tid and not TECHNIQUE_PATTERN.match(tid):
-            issues.append({
-                "code": "INVALID_TECHNIQUE_ID",
-                "message": f"Technique ID '{tid}' does not match MITRE format (T####.###)",
-                "technique_id": tid,
-            })
+            issues.append(
+                {
+                    "code": "INVALID_TECHNIQUE_ID",
+                    "message": f"Technique ID '{tid}' does not match MITRE format (T####.###)",
+                    "technique_id": tid,
+                }
+            )
     return issues
 
 
@@ -114,15 +122,19 @@ def validate_sigma_rule(sigma_rule: str) -> list[dict]:
 
         parsed = yaml.safe_load(sigma_rule)
         if not isinstance(parsed, dict):
-            issues.append({"code": "SIGMA_NOT_DICT", "message": "Sigma rule is not a valid YAML mapping"})
+            issues.append(
+                {"code": "SIGMA_NOT_DICT", "message": "Sigma rule is not a valid YAML mapping"}
+            )
         else:
             required = ["title", "detection"]
             for field in required:
                 if field not in parsed:
-                    issues.append({
-                        "code": "SIGMA_MISSING_FIELD",
-                        "message": f"Sigma rule missing required field: '{field}'",
-                    })
+                    issues.append(
+                        {
+                            "code": "SIGMA_MISSING_FIELD",
+                            "message": f"Sigma rule missing required field: '{field}'",
+                        }
+                    )
     except yaml.YAMLError as e:
         issues.append({"code": "SIGMA_YAML_ERROR", "message": f"Sigma rule is not valid YAML: {e}"})
     except ImportError:
@@ -137,12 +149,14 @@ def scan_pii(text: str) -> list[dict]:
     for pattern, pii_type in PII_PATTERNS:
         matches = pattern.findall(text)
         if matches:
-            findings.append({
-                "code": "PII_DETECTED",
-                "message": f"Potential {pii_type} detected in output ({len(matches)} instance(s))",
-                "type": pii_type,
-                "count": len(matches),
-            })
+            findings.append(
+                {
+                    "code": "PII_DETECTED",
+                    "message": f"Potential {pii_type} detected in output ({len(matches)} instance(s))",
+                    "type": pii_type,
+                    "count": len(matches),
+                }
+            )
     return findings
 
 

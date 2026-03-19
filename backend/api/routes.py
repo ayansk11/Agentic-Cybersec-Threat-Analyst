@@ -81,13 +81,15 @@ async def list_models():
     """Return available LLM models with metadata."""
     models = []
     for model_id, info in AVAILABLE_MODELS.items():
-        models.append({
-            "id": model_id,
-            "display_name": info["display_name"],
-            "description": info["description"],
-            "size": info["size"],
-            "default": info.get("default", False),
-        })
+        models.append(
+            {
+                "id": model_id,
+                "display_name": info["display_name"],
+                "description": info["description"],
+                "size": info["size"],
+                "default": info.get("default", False),
+            }
+        )
     return {"models": models, "default": DEFAULT_MODEL_ID}
 
 
