@@ -6,6 +6,7 @@ import logging
 import httpx
 
 from backend.config import get_settings
+from backend.security import validate_webhook_url
 
 logger = logging.getLogger("backend.webhooks")
 
@@ -43,6 +44,13 @@ async def send_webhook(cve_id: str, severity: str, summary: str, techniques: lis
     if not url:
         return
     if not _meets_threshold(severity, threshold):
+        return
+
+    # SSRF prevention: validate webhook URL targets a public host
+    try:
+        validate_webhook_url(url)
+    except ValueError as e:
+        logger.warning("Webhook URL blocked (SSRF prevention): %s — %s", url, e)
         return
 
     payload = {

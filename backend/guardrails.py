@@ -26,6 +26,15 @@ INJECTION_PATTERNS = [
     re.compile(r"act\s+as\s+(a|an)\s+", re.IGNORECASE),
     re.compile(r"forget\s+(all\s+)?(your|previous)", re.IGNORECASE),
     re.compile(r"do\s+not\s+follow\s+(any|your)", re.IGNORECASE),
+    # Additional injection patterns
+    re.compile(r"disregard\s+(all\s+)?(prior|above|previous)", re.IGNORECASE),
+    re.compile(r"new\s+instructions?\s*:", re.IGNORECASE),
+    re.compile(r"<\/?\s*(?:system|user|assistant|human|ai)\s*>", re.IGNORECASE),
+    re.compile(r"override\s+(?:the\s+)?(?:system|rules|instructions)", re.IGNORECASE),
+    re.compile(r"pretend\s+(?:you\s+are|to\s+be)", re.IGNORECASE),
+    re.compile(r"jailbreak", re.IGNORECASE),
+    re.compile(r"\bDAN\b.*mode", re.IGNORECASE),
+    re.compile(r"---+\s*SYSTEM\s*MESSAGE", re.IGNORECASE),
 ]
 
 # PII patterns (emails, SSNs, phone numbers, credit cards)
@@ -34,6 +43,13 @@ PII_PATTERNS = [
     (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "SSN"),
     (re.compile(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"), "phone"),
     (re.compile(r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b"), "credit_card"),
+]
+
+# Script injection patterns for output validation
+SCRIPT_INJECTION_PATTERNS = [
+    re.compile(r"<script\b", re.IGNORECASE),
+    re.compile(r"javascript\s*:", re.IGNORECASE),
+    re.compile(r"\bon\w+\s*=\s*[\"']", re.IGNORECASE),
 ]
 
 
@@ -160,6 +176,21 @@ def scan_pii(text: str) -> list[dict]:
     return findings
 
 
+def sanitize_html_in_output(text: str) -> list[dict]:
+    """Check for HTML/script injection patterns in LLM output."""
+    issues: list[dict] = []
+    for pattern in SCRIPT_INJECTION_PATTERNS:
+        if pattern.search(text):
+            issues.append(
+                {
+                    "code": "SCRIPT_INJECTION",
+                    "message": "Potential script injection pattern detected in output",
+                }
+            )
+            break  # One finding is enough
+    return issues
+
+
 def validate_output(
     playbook: str,
     sigma_rule: str,
@@ -172,6 +203,8 @@ def validate_output(
     issues.extend(validate_sigma_rule(sigma_rule))
     issues.extend(scan_pii(playbook))
     issues.extend(scan_pii(sigma_rule))
+    issues.extend(sanitize_html_in_output(playbook))
+    issues.extend(sanitize_html_in_output(sigma_rule))
 
     if issues:
         logger.warning("Output guardrail issues: %s", issues)

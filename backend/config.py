@@ -120,7 +120,7 @@ class Settings(BaseSettings):
     webhook_severity_threshold: str = "HIGH"
 
     # Cookie security (set True in production behind HTTPS)
-    cookie_secure: bool = False
+    cookie_secure: bool = True
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
@@ -146,6 +146,7 @@ def get_llm(model_id: str | None = None):
             model=settings.groq_model,
             api_key=settings.groq_api_key,
             temperature=0,
+            timeout=60,
         )
 
     from langchain_ollama import ChatOllama
@@ -159,4 +160,5 @@ def get_llm(model_id: str | None = None):
         model=ollama_model,
         base_url=settings.ollama_base_url,
         temperature=0,
+        timeout=300,
     )

@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
 from backend.api.rate_limit import limiter
 from backend.api.routes import router
@@ -46,9 +48,31 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key", "X-Requested-With"],
 )
+
+# CSRF origin check for state-changing requests
+
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    """Validate Origin header on unsafe HTTP methods to prevent CSRF attacks."""
+
+    async def dispatch(self, request, call_next):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            # Skip CSRF for OAuth callback redirects
+            if "/oauth/" in request.url.path and "/callback" in request.url.path:
+                return await call_next(request)
+            origin = request.headers.get("origin")
+            if origin and origin not in origins:
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Request origin not allowed"},
+                )
+        return await call_next(request)
+
+
+app.add_middleware(CSRFMiddleware)
 
 # Request logging
 app.add_middleware(RequestLoggingMiddleware)

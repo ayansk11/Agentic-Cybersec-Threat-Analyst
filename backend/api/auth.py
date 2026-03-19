@@ -5,12 +5,16 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import logging
+
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
 from backend.config import get_settings
+
+logger = logging.getLogger("backend.api.auth")
 
 # ── Password hashing ───────────────────────────────────────────────────
 
@@ -115,10 +119,28 @@ async def get_current_user(
             request.state.user_id = user.id
             return user
         except (JWTError, KeyError, ValueError) as exc:
+            logger.warning("JWT validation failed: %s", exc)
             raise HTTPException(
                 status_code=401,
-                detail=f"Invalid or expired token: {exc}",
+                detail="Invalid or expired token",
             ) from exc
+
+    # Strategy 1.5: httpOnly access_token cookie
+    access_cookie = request.cookies.get("access_token")
+    if access_cookie and settings.jwt_secret:
+        try:
+            payload = decode_access_token(access_cookie)
+            user = CurrentUser(
+                id=int(payload["sub"]),
+                email=payload["email"],
+                username=payload.get("username", payload["email"]),
+                role=payload["role"],
+            )
+            request.state.user_id = user.id
+            return user
+        except (JWTError, KeyError, ValueError) as exc:
+            logger.debug("Cookie JWT validation failed: %s", exc)
+            # Fall through to next strategy
 
     # Strategy 2: Legacy API key
     if api_key:

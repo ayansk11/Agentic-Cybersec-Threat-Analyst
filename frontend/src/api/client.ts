@@ -26,34 +26,25 @@ export interface AuthResponse {
   user: UserResponse;
 }
 
-// ── Auth header ────────────────────────────────────────────────────────
-
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem('access_token');
-  if (token) return { 'Authorization': `Bearer ${token}` };
-  // Fallback to legacy API key for dev/CI
-  const key = import.meta.env.VITE_API_KEY;
-  return key ? { 'X-API-Key': key } : {};
-}
-
 // ── Authenticated fetch with 401 retry ─────────────────────────────────
 
 async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const headers = { ...authHeaders(), ...(options.headers as Record<string, string> || {}) };
-  let resp = await fetch(url, { ...options, headers });
+  const headers: Record<string, string> = {
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(options.headers as Record<string, string> || {}),
+  };
+  // Fallback: legacy API key for programmatic/CI access
+  const key = import.meta.env.VITE_API_KEY;
+  if (key) headers['X-API-Key'] = key;
 
-  if (resp.status === 401 && localStorage.getItem('access_token')) {
+  let resp = await fetch(url, { ...options, headers, credentials: 'include' });
+
+  if (resp.status === 401) {
     // Try refreshing the token once
     try {
-      const data = await refreshToken();
-      localStorage.setItem('access_token', data.access_token);
-      const retryHeaders = {
-        'Authorization': `Bearer ${data.access_token}`,
-        ...(options.headers as Record<string, string> || {}),
-      };
-      resp = await fetch(url, { ...options, headers: retryHeaders });
+      await refreshToken();
+      resp = await fetch(url, { ...options, headers, credentials: 'include' });
     } catch {
-      localStorage.removeItem('access_token');
       window.location.reload();
     }
   }
@@ -379,7 +370,8 @@ export function streamAnalysis(
 
   fetch(`${API_BASE}/analyze/stream`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    credentials: 'include',
     body: JSON.stringify({ cve_id: cveId, cve_description: cveDescription, model: model || null }),
     signal: controller.signal,
   })

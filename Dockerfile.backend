@@ -16,9 +16,13 @@ deps = tomllib.load(open('/tmp/pyproject.toml', 'rb'))['project']['dependencies'
 open('/tmp/requirements.txt', 'w').write('\n'.join(deps))" \
     && pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy source code
+# Copy source code (no .env — injected at runtime via docker-compose)
 COPY backend/ backend/
-COPY .env* ./
+
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1

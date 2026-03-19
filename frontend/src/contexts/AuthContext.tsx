@@ -33,41 +33,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check for existing session on mount
   useEffect(() => {
     const init = async () => {
-      // Handle OAuth callback: read token from URL
-      const params = new URLSearchParams(window.location.search);
-      const callbackToken = params.get('access_token');
-      if (callbackToken) {
-        localStorage.setItem('access_token', callbackToken);
-        // Clean the URL
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        // Try refreshing (cookie-based)
-        try {
-          const data = await apiRefresh();
-          localStorage.setItem('access_token', data.access_token);
-        } catch {
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Validate token by fetching current user
+      // Try fetching current user (httpOnly cookie sent automatically)
       try {
         const me = await fetchCurrentUser();
         setUser(me);
+        setIsLoading(false);
+        return;
       } catch {
-        // Token invalid, try refresh
-        try {
-          const data = await apiRefresh();
-          localStorage.setItem('access_token', data.access_token);
-          const me = await fetchCurrentUser();
-          setUser(me);
-        } catch {
-          localStorage.removeItem('access_token');
-        }
+        // Token invalid or missing, try refresh
+      }
+
+      try {
+        await apiRefresh();
+        const me = await fetchCurrentUser();
+        setUser(me);
+      } catch {
+        // Not authenticated
       }
       setIsLoading(false);
     };
@@ -76,13 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await apiLogin(email, password);
-    localStorage.setItem('access_token', data.access_token);
     setUser(data.user);
   }, []);
 
   const register = useCallback(async (email: string, username: string, password: string) => {
     const data = await apiRegister(email, username, password);
-    localStorage.setItem('access_token', data.access_token);
     setUser(data.user);
   }, []);
 
@@ -92,7 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore errors on logout
     }
-    localStorage.removeItem('access_token');
     setUser(null);
   }, []);
 

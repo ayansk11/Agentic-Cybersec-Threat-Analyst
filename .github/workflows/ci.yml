@@ -27,6 +27,10 @@ jobs:
       - name: Test
         run: python -m pytest backend/tests/ -v --tb=short
 
+      - name: Security audit
+        run: pip install pip-audit && pip-audit
+        continue-on-error: true
+
   frontend:
     runs-on: ubuntu-latest
     steps:
@@ -50,3 +54,7 @@ jobs:
 
       - name: Build
         run: cd frontend && pnpm build
+
+      - name: Security audit
+        run: cd frontend && pnpm audit --audit-level=high
+        continue-on-error: true

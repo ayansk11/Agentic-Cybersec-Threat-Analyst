@@ -7,6 +7,21 @@ import aiosqlite
 
 DB_PATH = Path("data/analyses.db")
 
+# Whitelist of columns that can be updated via update_user()
+_ALLOWED_USER_COLUMNS = frozenset(
+    {
+        "email",
+        "username",
+        "hashed_password",
+        "role",
+        "oauth_provider",
+        "oauth_id",
+        "is_active",
+        "email_verified",
+        "updated_at",
+    }
+)
+
 
 async def create_user(
     email: str,
@@ -61,9 +76,13 @@ async def get_user_by_oauth(provider: str, oauth_id: str) -> dict | None:
 
 
 async def update_user(user_id: int, **fields) -> None:
-    """Update user fields by ID."""
+    """Update user fields by ID. Only whitelisted columns are allowed."""
     if not fields:
         return
+    # Security: validate column names against whitelist to prevent SQL injection
+    invalid_cols = set(fields.keys()) - _ALLOWED_USER_COLUMNS
+    if invalid_cols:
+        raise ValueError(f"Invalid column name(s): {invalid_cols}")
     fields["updated_at"] = datetime.now(timezone.utc).isoformat()
     set_clause = ", ".join(f"{k} = ?" for k in fields)
     values = list(fields.values()) + [user_id]

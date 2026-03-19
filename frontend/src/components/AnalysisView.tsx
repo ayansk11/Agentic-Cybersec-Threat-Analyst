@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Loader2, CheckCircle, AlertCircle, ShieldAlert, Shield, FileText, Code2, Copy, Check, Globe, Bug, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import { useAnalysis } from '../hooks/useSSE';
 import { fetchModels } from '../api/client';
 import type { ModelInfo } from '../api/client';
@@ -481,7 +482,7 @@ export function AnalysisView({ prefillCveId, onPrefillConsumed }: AnalysisViewPr
             INCIDENT RESPONSE PLAYBOOK
           </h3>
           <div className="prose">
-            <ReactMarkdown>{playbook}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{playbook}</ReactMarkdown>
           </div>
         </div>
       )}

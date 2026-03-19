@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 
 from backend.api.auth import (
@@ -32,7 +32,9 @@ from backend.api.schemas import (
     WebhookSettingsUpdate,
     WebhookTestRequest,
 )
+from backend.api.rate_limit import limiter
 from backend.config import get_settings
+from backend.security import validate_webhook_url
 from backend.db_users import (
     consume_password_reset_token,
     consume_verification_token,
@@ -98,6 +100,17 @@ async def _issue_tokens(user: dict, response: Response) -> AuthResponse:
         path="/api/auth",
     )
 
+    # Set access token as httpOnly cookie (primary auth method)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=settings.cookie_secure,
+        max_age=settings.jwt_access_expire_minutes * 60,
+        path="/api",
+    )
+
     return AuthResponse(
         access_token=access_token,
         user=_user_to_response(user),
@@ -136,7 +149,8 @@ async def _send_reset_token(user_id: int, email: str) -> str:
 
 
 @auth_router.post("/register", response_model=AuthResponse)
-async def register(body: RegisterRequest, response: Response):
+@limiter.limit("3/minute")
+async def register(request: Request, body: RegisterRequest, response: Response):
     """Register a new user with email and password."""
     settings = get_settings()
     if not settings.jwt_secret:
@@ -165,7 +179,8 @@ async def register(body: RegisterRequest, response: Response):
 
 
 @auth_router.post("/login", response_model=AuthResponse)
-async def login(body: LoginRequest, response: Response):
+@limiter.limit("5/minute")
+async def login(request: Request, body: LoginRequest, response: Response):
     """Authenticate with email and password."""
     settings = get_settings()
     if not settings.jwt_secret:
@@ -225,6 +240,7 @@ async def logout(
         await revoke_refresh_token(hash_refresh_token(refresh_token))
 
     response.delete_cookie(key="refresh_token", path="/api/auth")
+    response.delete_cookie(key="access_token", path="/api")
     return {"message": "Logged out"}
 
 
@@ -313,7 +329,7 @@ async def oauth_callback(
         user_info = await oauth.get_user_info(provider_token)
     except Exception as exc:
         logger.error("OAuth callback failed for %s: %s", provider, exc)
-        raise HTTPException(status_code=400, detail=f"OAuth authentication failed: {exc}") from exc
+        raise HTTPException(status_code=400, detail="OAuth authentication failed") from exc
 
     # Find or create user
     user = await get_user_by_oauth(user_info.provider, user_info.oauth_id)
@@ -351,10 +367,20 @@ async def oauth_callback(
     ).isoformat()
     await store_refresh_token(user["id"], hash_refresh_token(refresh), expires_at)
 
-    # Redirect to frontend with access token
+    # Redirect to frontend (no token in URL)
     redirect = RedirectResponse(
-        url=f"{settings.frontend_url}/auth/callback?access_token={access_token}",
+        url=f"{settings.frontend_url}/auth/callback",
         status_code=302,
+    )
+    # Set access token as httpOnly cookie (no token in URL)
+    redirect.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=settings.cookie_secure,
+        max_age=settings.jwt_access_expire_minutes * 60,
+        path="/api",
     )
     redirect.set_cookie(
         key="refresh_token",
@@ -427,7 +453,8 @@ async def admin_update_user(
 
 
 @auth_router.post("/forgot-password")
-async def forgot_password(body: PasswordResetRequest):
+@limiter.limit("3/minute")
+async def forgot_password(request: Request, body: PasswordResetRequest):
     """Request a password reset token. Always returns success to prevent email enumeration."""
     settings = get_settings()
     if not settings.jwt_secret:
@@ -443,7 +470,8 @@ async def forgot_password(body: PasswordResetRequest):
 
 
 @auth_router.post("/reset-password")
-async def reset_password(body: PasswordResetConfirm):
+@limiter.limit("5/minute")
+async def reset_password(request: Request, body: PasswordResetConfirm):
     """Reset password using a valid reset token."""
     token_hash_val = hash_refresh_token(body.token)
     token_row = await verify_password_reset_token(token_hash_val)
@@ -587,6 +615,11 @@ async def test_webhook(
         "summary": "This is a test webhook from ThreatAnalyst.",
         "techniques": [{"id": "T1059", "name": "Command and Scripting Interpreter"}],
     }
+    try:
+        validate_webhook_url(body.url)
+    except ValueError as e:
+        return {"success": False, "error": f"URL blocked: {e}"}
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(body.url, json=payload)
