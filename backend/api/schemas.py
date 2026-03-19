@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class AnalysisRequest(BaseModel):
     cve_id: str = Field(default="", description="CVE identifier (e.g., CVE-2021-44228)")
     cve_description: str = Field(default="", description="Raw vulnerability description text")
+    model: str | None = Field(default=None, description="Model ID to use (e.g., 'foundation-sec-8b')")
 
 
 class AnalysisResponse(BaseModel):

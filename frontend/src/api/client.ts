@@ -205,6 +205,27 @@ export async function fetchAuthProviders(): Promise<AuthProvidersResponse> {
   return resp.json();
 }
 
+// ── Models ────────────────────────────────────────────────────────────
+
+export interface ModelInfo {
+  id: string;
+  display_name: string;
+  description: string;
+  size: string;
+  default: boolean;
+}
+
+export interface ModelsResponse {
+  models: ModelInfo[];
+  default: string;
+}
+
+export async function fetchModels(): Promise<ModelsResponse> {
+  const resp = await fetch(`${API_BASE}/models`);
+  if (!resp.ok) return { models: [], default: 'foundation-sec-8b' };
+  return resp.json();
+}
+
 // ── CVE ────────────────────────────────────────────────────────────────
 
 export async function fetchCVE(cveId: string) {
@@ -352,13 +373,14 @@ export function streamAnalysis(
   onUpdate: (agent: string, output: Record<string, unknown>) => void,
   onDone: () => void,
   onError: (error: string) => void,
+  model?: string,
 ): () => void {
   const controller = new AbortController();
 
   fetch(`${API_BASE}/analyze/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ cve_id: cveId, cve_description: cveDescription }),
+    body: JSON.stringify({ cve_id: cveId, cve_description: cveDescription, model: model || null }),
     signal: controller.signal,
   })
     .then(async (response) => {

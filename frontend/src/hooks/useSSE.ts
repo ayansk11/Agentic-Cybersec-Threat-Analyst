@@ -27,7 +27,7 @@ export function useAnalysis() {
 
   const abortRef = useRef<(() => void) | null>(null);
 
-  const startAnalysis = useCallback((cveId: string, cveDescription: string) => {
+  const startAnalysis = useCallback((cveId: string, cveDescription: string, model?: string) => {
     // Cancel any ongoing analysis
     if (abortRef.current) abortRef.current();
 
@@ -74,6 +74,7 @@ export function useAnalysis() {
       (error) => {
         setState((prev) => ({ ...prev, isLoading: false, error, currentAgent: null }));
       },
+      model,
     );
 
     abortRef.current = cancel;

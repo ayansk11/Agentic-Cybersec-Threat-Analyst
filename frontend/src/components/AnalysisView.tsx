@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, Loader2, CheckCircle, AlertCircle, ShieldAlert, Shield, FileText, Code2, Copy, Check, Globe, Bug } from 'lucide-react';
+import { Search, Loader2, CheckCircle, AlertCircle, ShieldAlert, Shield, FileText, Code2, Copy, Check, Globe, Bug, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAnalysis } from '../hooks/useSSE';
+import { fetchModels } from '../api/client';
+import type { ModelInfo } from '../api/client';
 import type { ExtractedInfo } from '../types';
 
 function SeverityBadge({ severity }: { severity: string }) {
@@ -114,7 +116,16 @@ interface AnalysisViewProps {
 export function AnalysisView({ prefillCveId, onPrefillConsumed }: AnalysisViewProps) {
   const [cveId, setCveId] = useState('');
   const [description, setDescription] = useState('');
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [selectedModel, setSelectedModel] = useState('');
   const analysis = useAnalysis();
+
+  useEffect(() => {
+    fetchModels().then((data) => {
+      setModels(data.models);
+      setSelectedModel(data.default);
+    });
+  }, []);
 
   useEffect(() => {
     if (prefillCveId) {
@@ -126,7 +137,7 @@ export function AnalysisView({ prefillCveId, onPrefillConsumed }: AnalysisViewPr
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!cveId && !description) return;
-    analysis.startAnalysis(cveId, description);
+    analysis.startAnalysis(cveId, description, selectedModel);
   };
 
   const completedAgents = analysis.agentUpdates.map((u) => u.agent);
@@ -190,6 +201,36 @@ export function AnalysisView({ prefillCveId, onPrefillConsumed }: AnalysisViewPr
               outline: 'none',
             }}
           />
+          {models.length > 0 && (
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Model</span>
+              <div className="relative">
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-sm cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                  }}
+                >
+                  {models.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.display_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--text-secondary)' }} />
+              </div>
+              {selectedModel && models.find((m) => m.id === selectedModel) && (
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  {models.find((m) => m.id === selectedModel)!.description} ({models.find((m) => m.id === selectedModel)!.size})
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </form>
 

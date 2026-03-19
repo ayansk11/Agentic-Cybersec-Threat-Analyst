@@ -157,7 +157,7 @@ def playbook_generator_agent(state: ThreatAnalysisState) -> dict:
     """
     cve_id = state.get("cve_id", "")
     threat_context = _build_threat_context(state)
-    llm = get_llm()
+    llm = get_llm(state.get("model_id"))
 
     # --- LLM Call 1: Generate Playbook ---
     playbook = ""

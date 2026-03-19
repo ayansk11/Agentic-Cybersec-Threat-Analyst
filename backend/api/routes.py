@@ -28,7 +28,8 @@ from backend.api.schemas import (
     ThreatFoxFeedResponse,
     ThreatFoxIOCItem,
 )
-from backend.config import get_settings
+from backend.config import AVAILABLE_MODELS, DEFAULT_MODEL_ID, get_settings
+from backend.guardrails import GuardrailViolation, validate_input
 from backend.version import __version__
 from backend.db import (
     get_analysis,
@@ -68,6 +69,26 @@ def _scoped_user_id(user: CurrentUser) -> int | None:
 async def get_app_version():
     """Return the current application version."""
     return {"version": __version__}
+
+
+# ---------------------------------------------------------------------------
+# Models (public, no auth)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/models")
+async def list_models():
+    """Return available LLM models with metadata."""
+    models = []
+    for model_id, info in AVAILABLE_MODELS.items():
+        models.append({
+            "id": model_id,
+            "display_name": info["display_name"],
+            "description": info["description"],
+            "size": info["size"],
+            "default": info.get("default", False),
+        })
+    return {"models": models, "default": DEFAULT_MODEL_ID}
 
 
 # ---------------------------------------------------------------------------
@@ -133,16 +154,31 @@ async def stream_analysis(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """Run the full agent pipeline with SSE streaming updates."""
+    # Input guardrails
+    try:
+        input_warnings = validate_input(body.cve_id, body.cve_description)
+    except GuardrailViolation as e:
+        raise HTTPException(status_code=422, detail=e.message)
 
     async def event_generator():
+        # Emit input warnings if any
+        if input_warnings:
+            yield {
+                "event": "guardrail",
+                "data": json.dumps({"type": "input_warning", "issues": input_warnings}),
+            }
+
+        model_id = body.model or DEFAULT_MODEL_ID
         initial_state = {
             "cve_id": body.cve_id,
             "cve_description": body.cve_description,
+            "model_id": model_id,
             "extracted_info": {},
             "attack_techniques": [],
             "rag_context": "",
             "response_playbook": "",
             "sigma_rule": "",
+            "guardrail_issues": [],
             "messages": [],
         }
 
@@ -199,6 +235,14 @@ async def stream_analysis(
                 techniques=final_state.get("attack_techniques", []),
             )
 
+            # Emit output guardrail results
+            guardrail_issues = final_state.get("guardrail_issues", [])
+            if guardrail_issues:
+                yield {
+                    "event": "guardrail",
+                    "data": json.dumps({"type": "output_issues", "issues": guardrail_issues}),
+                }
+
             yield {
                 "event": "done",
                 "data": json.dumps({"status": "complete"}),
@@ -223,14 +267,22 @@ async def analyze(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """Run the full agent pipeline (non-streaming, returns complete result)."""
+    try:
+        validate_input(body.cve_id, body.cve_description)
+    except GuardrailViolation as e:
+        raise HTTPException(status_code=422, detail=e.message)
+
+    model_id = body.model or DEFAULT_MODEL_ID
     initial_state = {
         "cve_id": body.cve_id,
         "cve_description": body.cve_description,
+        "model_id": model_id,
         "extracted_info": {},
         "attack_techniques": [],
         "rag_context": "",
         "response_playbook": "",
         "sigma_rule": "",
+        "guardrail_issues": [],
         "messages": [],
     }
 

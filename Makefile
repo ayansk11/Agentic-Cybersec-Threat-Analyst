@@ -14,6 +14,7 @@ setup:
 		sleep 2; \
 	fi
 	ollama pull hf.co/fdtn-ai/Foundation-Sec-8B-Reasoning-Q4_K_M-GGUF
+	ollama pull hf.co/mradermacher/DeepHat-V1-7B-GGUF:Q4_K_M
 	docker compose up -d qdrant
 	@echo "Waiting for Qdrant to be ready..."
 	@sleep 3

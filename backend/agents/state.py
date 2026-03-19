@@ -15,6 +15,7 @@ class ThreatAnalysisState(TypedDict):
     # Input
     cve_id: str
     cve_description: str
+    model_id: str
 
     # Agent 1 output
     extracted_info: dict
@@ -26,6 +27,9 @@ class ThreatAnalysisState(TypedDict):
     # Agent 3 output
     response_playbook: str
     sigma_rule: str
+
+    # Guardrail output
+    guardrail_issues: list[dict]
 
     # Shared message log (append-only)
     messages: Annotated[list[str], operator.add]

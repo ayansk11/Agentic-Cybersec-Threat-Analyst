@@ -4,6 +4,27 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
+# ── Model Registry ──────────────────────────────────────────────────────
+
+AVAILABLE_MODELS: dict[str, dict] = {
+    "foundation-sec-8b": {
+        "ollama_name": "hf.co/fdtn-ai/Foundation-Sec-8B-Reasoning-Q4_K_M-GGUF",
+        "display_name": "Foundation-Sec-8B",
+        "description": "Cisco security-focused 8B reasoning model (Q4_K_M quantization)",
+        "size": "4.9 GB",
+        "default": True,
+    },
+    "deephat-v1-7b": {
+        "ollama_name": "hf.co/mradermacher/DeepHat-V1-7B-GGUF:Q4_K_M",
+        "display_name": "DeepHat-V1-7B",
+        "description": "Cybersecurity-tuned 7B model for threat analysis (Q4_K_M quantization)",
+        "size": "4.8 GB",
+        "default": False,
+    },
+}
+
+DEFAULT_MODEL_ID = next(k for k, v in AVAILABLE_MODELS.items() if v.get("default"))
+
 
 class Settings(BaseSettings):
     # LLM
@@ -109,8 +130,13 @@ def get_settings() -> Settings:
     return Settings()
 
 
-def get_llm():
-    """Return the configured LLM client."""
+def get_llm(model_id: str | None = None):
+    """Return the configured LLM client.
+
+    Args:
+        model_id: Optional model registry key (e.g. "foundation-sec-8b", "deephat-v1-7b").
+                  Falls back to the default model if not specified.
+    """
     settings = get_settings()
 
     if settings.llm_provider == "groq":
@@ -124,8 +150,13 @@ def get_llm():
 
     from langchain_ollama import ChatOllama
 
+    # Resolve model name from registry, or fall back to settings
+    ollama_model = settings.ollama_model
+    if model_id and model_id in AVAILABLE_MODELS:
+        ollama_model = AVAILABLE_MODELS[model_id]["ollama_name"]
+
     return ChatOllama(
-        model=settings.ollama_model,
+        model=ollama_model,
         base_url=settings.ollama_base_url,
         temperature=0,
     )

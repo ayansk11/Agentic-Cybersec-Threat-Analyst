@@ -158,7 +158,7 @@ def attack_classifier_agent(state: ThreatAnalysisState) -> dict:
     )
 
     # Step 5: Call LLM
-    llm = get_llm()
+    llm = get_llm(state.get("model_id"))
     messages = [
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=user_prompt),
